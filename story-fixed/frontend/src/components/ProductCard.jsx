@@ -1,38 +1,82 @@
-// ProductCard — clean black & white card
+// ProductCard — premium black & white, hover overlay quick add, badges
 import { fp, pct } from '../utils.js';
 
 export default function ProductCard({ product, onClick, onQuickAdd, isWish, onToggleWish }) {
+  if (!product) return null;
+
   const discount = pct(product.orig_price, product.price);
+  const isNew    = !!product.tag && /new/i.test(String(product.tag));
+  const isSale   = discount > 0;
+  const isSoldOut = product.in_stock === 0 || product.sold_out === 1;
+
+  // Tiny color preview row (max 4 dots)
+  const colors = Array.isArray(product.colors) ? product.colors : [];
+  const dots   = colors.slice(0, 4);
+  const more   = Math.max(0, colors.length - dots.length);
+
+  const handleQuickAdd = (e) => {
+    e.stopPropagation();
+    if (isSoldOut) return;
+    onQuickAdd && onQuickAdd(product.id);
+  };
+
   return (
-    <div className="pc" onClick={onClick}>
+    <div className="pc" onClick={onClick} role="button" tabIndex={0}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick && onClick(); } }}>
       <div className="pc-img">
-        <span className="pc-icon">{product.icon || '◉'}</span>
-        {/* Wishlist button */}
+        <span className="pc-icon">{product.icon || '\u25C9'}</span>
+
+        {/* Badges */}
+        <div className="pc-badges">
+          {isNew && <span className="pc-badge pc-badge--new">NEW</span>}
+          {isSale && <span className="pc-badge pc-badge--sale">-{discount}%</span>}
+          {isSoldOut && <span className="pc-badge pc-badge--soldout">SOLD OUT</span>}
+        </div>
+
+        {/* Wishlist */}
         <button
-          onClick={e => { e.stopPropagation(); onToggleWish && onToggleWish(product.id); }}
-          style={{ position:'absolute', top:12, right:12, background:'none', border:'none', cursor:'pointer', fontSize:'18px', opacity: isWish ? 1 : .4, lineHeight:1, color:'#111' }}>
-          {isWish ? '♥' : '♡'}
+          aria-label={isWish ? 'Remove from wishlist' : 'Add to wishlist'}
+          className={`pc-wish${isWish ? ' active' : ''}`}
+          onClick={e => { e.stopPropagation(); onToggleWish && onToggleWish(product.id); }}>
+          {isWish ? '\u2665' : '\u2661'}
         </button>
+
+        {/* Hover quick add overlay */}
+        <div className="pc-overlay">
+          <button
+            type="button"
+            className="pc-quickadd"
+            disabled={isSoldOut}
+            onClick={handleQuickAdd}>
+            <span>{isSoldOut ? 'SOLD OUT' : 'QUICK ADD'}</span>
+            {!isSoldOut && <span className="pc-quickadd-arrow">→</span>}
+          </button>
+        </div>
       </div>
-      {product.tag && <div className="pc-tag">{product.tag}</div>}
-      {discount > 0 && (
-        <div style={{ position:'absolute', top:12, left:12, background:'#111', color:'#fff', fontFamily:'var(--fm)', fontSize:'7px', letterSpacing:'.1em', padding:'4px 10px', fontWeight:700 }}>
-          -{discount}%
-        </div>
-      )}
+
       <div className="pc-body">
-        <div style={{ fontFamily:'var(--fm)', fontSize:'8px', letterSpacing:'.15em', color:'#888', marginBottom:4, fontWeight:600 }}>{product.brand}</div>
-        <div style={{ fontFamily:'var(--fm)', fontSize:'10px', letterSpacing:'.03em', marginBottom:10, fontWeight:500 }}>{product.name}</div>
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-          <span style={{ fontFamily:'var(--fm)', fontSize:'12px', letterSpacing:'.02em', fontWeight:600 }}>{fp(product.price)}</span>
-          {discount > 0 && <span style={{ fontFamily:'var(--fm)', fontSize:'8px', color:'#999', textDecoration:'line-through' }}>{fp(product.orig_price)}</span>}
+        <div className="pc-brand">{product.brand || ''}</div>
+        <div className="pc-name" title={product.name}>{product.name || ''}</div>
+
+        <div className="pc-price-row">
+          <span className="pc-price">{fp(product.price)}</span>
+          {isSale && <span className="pc-price-orig">{fp(product.orig_price)}</span>}
+          {isSale && <span className="pc-price-save">SAVE {discount}%</span>}
         </div>
-        <button
-          className="btn btn-k"
-          style={{ width:'100%', fontSize:'7.5px', padding:'11px', letterSpacing:'.2em' }}
-          onClick={e => { e.stopPropagation(); onQuickAdd && onQuickAdd(product.id); }}>
-          QUICK ADD
-        </button>
+
+        {dots.length > 0 && (
+          <div className="pc-colors" aria-label="available colors">
+            {dots.map((c, i) => (
+              <span
+                key={(c?.color_name || 'c') + i}
+                className="pc-color-dot"
+                title={c?.color_name || ''}
+                style={{ background: c?.color_hex || '#000' }}
+              />
+            ))}
+            {more > 0 && <span className="pc-colors-more">+{more}</span>}
+          </div>
+        )}
       </div>
     </div>
   );
