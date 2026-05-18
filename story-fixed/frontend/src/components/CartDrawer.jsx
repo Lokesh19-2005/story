@@ -1,6 +1,7 @@
 // src/components/CartDrawer.jsx
 import { fp } from '../utils.js';
 import { useCartStock } from '../hooks/useCartStock.js';
+import ProductImage from './ProductImage.jsx';
 
 export default function CartDrawer({ open, onClose, cart, chQty, remCart, setPage, cTotal, toast }) {
   const { stockByLineId, statusByLineId, hasIssues, issues } = useCartStock(cart);
@@ -47,8 +48,8 @@ export default function CartDrawer({ open, onClose, cart, chQty, remCart, setPag
                   <div key={item.id} className={blocked ? 'cart-line-blocked' : ''}
                     style={{ display:'flex', gap:16, padding:'20px 0', borderBottom:'var(--bd)' }}>
                     <div className="cart-line-thumb"
-                      style={{ width:64, height:80, background:'var(--off)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, position:'relative' }}>
-                      <span style={{ fontSize:28, opacity:.2 }}>{item.icon || '◉'}</span>
+                      style={{ width:64, height:80, background:'var(--off)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, position:'relative', overflow:'hidden' }}>
+                      <ProductImage product={item} alt={item.product_name} fallbackIcon={item.icon || '◉'} />
                       {isOOS && (
                         <div style={{ position:'absolute', inset:0, background:'rgba(255,255,255,.66)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                           <span style={{ fontFamily:'var(--fm)', fontSize:'7px', letterSpacing:'.2em', fontWeight:700, color:'#111', background:'#fff', border:'1px solid #111', padding:'3px 6px' }}>SOLD OUT</span>

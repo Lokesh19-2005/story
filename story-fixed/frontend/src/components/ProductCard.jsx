@@ -1,12 +1,15 @@
 // ProductCard — luxury fashion ecommerce styling (preserves all functionality)
 import { fp, pct } from '../utils.js';
+import ProductImage from './ProductImage.jsx';
 
 export default function ProductCard({ product, onClick, onQuickAdd, isWish, onToggleWish }) {
   if (!product) return null;
 
   const discount  = pct(product.orig_price, product.price);
-  const isNew     = !!product.tag && /new/i.test(String(product.tag));
-  const isSale    = discount > 0;
+  const badgesArr = Array.isArray(product.badges) ? product.badges : [];
+  const isNew     = badgesArr.includes('NEW') || (!!product.tag && /new/i.test(String(product.tag)));
+  const isHot     = badgesArr.includes('HOT') || (!!product.tag && /hot|bestseller|limited/i.test(String(product.tag)));
+  const isSale    = discount > 0 || badgesArr.includes('SALE');
   const isSoldOut = product.in_stock === 0 || product.sold_out === 1;
 
   // Optional aggregate stock signal (only used if backend exposes it).
@@ -20,10 +23,12 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
   const badge = isSoldOut
     ? { kind: 'soldout', label: 'SOLD OUT' }
     : isSale
-      ? { kind: 'sale', label: `\u2212${discount}%` }
-      : isNew
-        ? { kind: 'new',  label: 'NEW' }
-        : null;
+      ? { kind: 'sale', label: discount > 0 ? `\u2212${discount}%` : 'SALE' }
+      : isHot
+        ? { kind: 'new', label: 'HOT' }
+        : isNew
+          ? { kind: 'new',  label: 'NEW' }
+          : null;
 
   // Tiny color preview row (max 4 dots)
   const colors = Array.isArray(product.colors) ? product.colors : [];
@@ -53,7 +58,7 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
       {/* Image / media */}
       <div className="pc-img">
         <div className="pc-img-inner">
-          <span className="pc-icon">{product.icon || '\u25C9'}</span>
+          <ProductImage product={product} alt={product.name} fallbackIcon={product.icon || '\u25C9'} />
         </div>
 
         {/* Sold-out luxury overlay */}

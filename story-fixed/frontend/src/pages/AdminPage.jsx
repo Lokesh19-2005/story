@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, uploadProductImage } from '../services/api.js';
 import { fp } from '../utils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
+import ProductImage from '../components/ProductImage.jsx';
 
 const STATUS_OPTS = ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 const PAY_OPTS    = ['pending', 'awaiting', 'paid', 'failed', 'refunded'];
@@ -175,7 +176,12 @@ function ProductsTab() {
               {products.map(p => (
                 <tr key={p.id} style={{ borderBottom: 'var(--bd)', opacity: p.is_active ? 1 : .5 }}>
                   <td style={{ padding: '12px' }}>
-                    <div style={{ fontSize: '9px', display:'flex', alignItems:'center', gap:8 }}>{p.image_url ? <img src={p.image_url} alt='' style={{ width:28, height:28, objectFit:'cover', borderRadius:2 }} /> : <span>{p.icon}</span>} {p.name}</div>
+                    <div style={{ fontSize: '9px', display:'flex', alignItems:'center', gap:8 }}>
+                      <span className="admin-thumb">
+                        <ProductImage product={p} alt={p.name} fallbackIcon={p.icon || '\u25C9'} />
+                      </span>
+                      <span>{p.name}</span>
+                    </div>
                     <div style={{ fontSize: '7.5px', color: 'var(--warm)' }}>{p.slug}</div>
                   </td>
                   <td style={{ padding: '12px' }}>{p.brand || '—'}</td>

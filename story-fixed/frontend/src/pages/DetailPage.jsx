@@ -4,6 +4,7 @@ import { productsAPI } from '../services/api.js';
 import { fp, pct } from '../utils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProductCard from '../components/ProductCard.jsx';
+import ProductImage from '../components/ProductImage.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const TRUST = [
@@ -90,14 +91,20 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
     }
   }, [selSize, selColor, product, qty]);
 
-  // Build a 4-frame gallery (placeholder shades) so the layout reads like a real PDP
-  // without inventing image assets. Each frame uses the same product icon.
-  const frames = useMemo(() => ([
-    { id: 'front', label: 'Front',   tone: 'tone-a' },
-    { id: 'side',  label: 'Side',    tone: 'tone-b' },
-    { id: 'back',  label: 'Back',    tone: 'tone-c' },
-    { id: 'detail',label: 'Detail',  tone: 'tone-d' },
-  ]), []);
+  // Build a gallery — uses real images when present, else falls back to tonal
+  // placeholder shades so the layout still reads like a real PDP.
+  const frames = useMemo(() => {
+    const tones = ['tone-a', 'tone-b', 'tone-c', 'tone-d'];
+    const labels = ['Front', 'Side', 'Back', 'Detail'];
+    const imgs = (product && Array.isArray(product.images)) ? product.images : [];
+    const count = Math.max(imgs.length, 4);
+    return Array.from({ length: count }, (_, i) => ({
+      id:    `frame-${i}`,
+      label: labels[i] || `View ${i + 1}`,
+      tone:  tones[i % tones.length],
+      src:   imgs[i] || imgs[i % Math.max(1, imgs.length)] || null,
+    }));
+  }, [product]);
 
   if (loading) return <LoadingScreen message="LOADING PRODUCT..." />;
 
@@ -189,7 +196,12 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
                 onClick={() => setActiveFrame(i)}
                 title={f.label}
               >
-                <span className="pd2-thumb-icon">{product.icon || '\u25C9'}</span>
+                <ProductImage
+                  src={f.src}
+                  alt={`${product.name} — ${f.label}`}
+                  fallbackIcon={product.icon || '\u25C9'}
+                  className="pd2-thumb-icon"
+                />
               </button>
             ))}
           </div>
@@ -197,7 +209,11 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
           {/* Main media stack */}
           <div className="pd2-media-col">
             <div className={`pd2-media ${frames[activeFrame].tone}`}>
-              <span className="pd2-media-icon">{product.icon || '\u25C9'}</span>
+              <ProductImage
+                src={frames[activeFrame].src}
+                alt={`${product.name} — ${frames[activeFrame].label}`}
+                fallbackIcon={product.icon || '\u25C9'}
+              />
 
               {/* Top-left: hairline category */}
               <div className="pd2-media-top">
@@ -234,7 +250,11 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
             <div className="pd2-strip">
               {frames.slice(1, 3).map(f => (
                 <div key={f.id} className={`pd2-strip-cell ${f.tone}`}>
-                  <span className="pd2-strip-icon">{product.icon || '\u25C9'}</span>
+                  <ProductImage
+                    src={f.src}
+                    alt={`${product.name} — ${f.label}`}
+                    fallbackIcon={product.icon || '\u25C9'}
+                  />
                 </div>
               ))}
             </div>

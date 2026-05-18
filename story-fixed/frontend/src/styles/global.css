@@ -1867,3 +1867,71 @@ a { color: inherit; text-decoration: none; }
   color: #fff;
   cursor: not-allowed;
 }
+
+
+
+/* ══════════════════════════════════════════════════
+   PRODUCT IMAGE — resilient gallery primitives
+══════════════════════════════════════════════════ */
+
+img.pi {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #efeee9;
+}
+
+.pi-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: inherit;
+  color: #111;
+  opacity: .14;
+  filter: grayscale(1);
+  background: linear-gradient(160deg, #f7f6f3 0%, #ecebe7 55%, #e3e2dd 100%);
+}
+
+/* ProductCard — image fills the editorial 4:5 frame */
+.pc-img-inner img.pi {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .9s cubic-bezier(.2,.8,.2,1), opacity .35s;
+}
+.pc:hover .pc-img-inner img.pi { transform: scale(1.04); }
+.pc-img-inner .pi-fallback { font-size: 96px; }
+
+/* ProductDetail — main media + thumbnail + strip cells */
+.pd2-media       img.pi { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.2,.8,.2,1); }
+.pd2-media:hover img.pi { transform: scale(1.04); }
+.pd2-media       .pi-fallback { font-size: 220px; }
+
+.pd2-thumb img.pi { width: 100%; height: 100%; object-fit: cover; }
+.pd2-thumb .pi-fallback { font-size: 28px; }
+
+.pd2-strip-cell img.pi { width: 100%; height: 100%; object-fit: cover; }
+.pd2-strip-cell .pi-fallback { font-size: 90px; }
+
+/* Admin row thumb */
+.admin-thumb {
+  width: 36px; height: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #efeee9; border: 1px solid #ececea;
+  overflow: hidden; flex-shrink: 0;
+}
+.admin-thumb img.pi  { width: 100%; height: 100%; object-fit: cover; }
+.admin-thumb .pi-fallback { font-size: 16px; }
+
+/* Cart line thumbs (drawer + page) — scoped fallback sizes */
+.cart-line-thumb img.pi { width: 100%; height: 100%; object-fit: cover; }
+.cart-line-thumb .pi-fallback { font-size: 28px; }
+
+/* Mobile responsive image tweaks */
+@media (max-width: 768px) {
+  .pc-img-inner .pi-fallback   { font-size: 72px; }
+  .pd2-media .pi-fallback      { font-size: 140px; }
+  .pd2-strip-cell .pi-fallback { font-size: 60px; }
+}

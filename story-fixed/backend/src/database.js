@@ -56,6 +56,8 @@ export function initDB() {
       orig_price     REAL NOT NULL,
       icon           TEXT DEFAULT '◉',
       image_url      TEXT DEFAULT '',
+      images         TEXT DEFAULT '[]',
+      badges         TEXT DEFAULT '[]',
       tag            TEXT DEFAULT '',
       brand_id       TEXT REFERENCES brands(id),
       category_id    TEXT REFERENCES categories(id),
@@ -226,6 +228,8 @@ export function initDB() {
 
   // Safe migrations for existing databases
   try { db.exec("ALTER TABLE products ADD COLUMN image_url TEXT DEFAULT ''"); } catch(e) {}
+  try { db.exec("ALTER TABLE products ADD COLUMN images TEXT DEFAULT '[]'"); } catch(e) {}
+  try { db.exec("ALTER TABLE products ADD COLUMN badges TEXT DEFAULT '[]'"); } catch(e) {}
   try { db.exec("ALTER TABLE coupons ADD COLUMN expires_at TEXT DEFAULT NULL"); } catch(e) {}
   try { db.exec("ALTER TABLE orders ADD COLUMN updated_at TEXT DEFAULT (datetime('now'))"); } catch(e) {}
 
@@ -233,81 +237,197 @@ export function initDB() {
   console.log('✅ Database initialized');
 }
 
+// ── Image helper ───────────────────────────────────────────
+// Uses picsum.photos with a stable seed so demo images are deterministic,
+// CDN-cached, and free to hot-link. The grayscale filter gives an editorial
+// monochrome feel that matches the luxury aesthetic of the rest of the UI.
+const img = (slug, n) => `https://picsum.photos/seed/story-${slug}-${n}/800/1000?grayscale`;
+const imageSet = (slug) => [img(slug, 1), img(slug, 2), img(slug, 3), img(slug, 4)];
+
+// ── Demo product catalogue (18 luxury / streetwear pieces) ─
+const COLORS = {
+  black: { name: 'Black', hex: '#0a0a0a' },
+  white: { name: 'White', hex: '#f5f5f0' },
+  slate: { name: 'Slate', hex: '#4a5568' },
+  sand:  { name: 'Sand',  hex: '#c4a882' },
+  bone:  { name: 'Bone',  hex: '#e8e2d4' },
+  ink:   { name: 'Ink',   hex: '#1a1a1f' },
+};
+
+const SIZES = {
+  apparel:    ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  outerwear:  ['S', 'M', 'L', 'XL'],
+  bottoms:    ['28', '30', '32', '34', '36'],
+  shoes:      ['40', '41', '42', '43', '44', '45'],
+  watch:      ['38mm', '41mm', '44mm'],
+  belt:       ['S', 'M', 'L'],
+  one:        ['ONE SIZE'],
+};
+
+const CATALOGUE = [
+  // ── T-Shirts ────────────────────────────────────────────
+  { slug: 'monolith-heavyweight-tee', name: 'MONOLITH HEAVYWEIGHT TEE', cat: 'tops', brand: 'story',    price: 2999,  orig: 3999,  icon: '◉', tag: 'NEW',        badges: ['NEW'],
+    desc: 'Heavyweight 280gsm cotton jersey, garment-dyed for a lived-in tone. Boxy fit, dropped shoulder, ribbed crew.',
+    sizes: SIZES.apparel, colors: ['black', 'white', 'sand'] },
+  { slug: 'eclipse-box-tee', name: 'ECLIPSE BOX TEE', cat: 'tops', brand: 'void', price: 3499, orig: 4499, icon: '◐', tag: 'HOT', badges: ['HOT'],
+    desc: 'Mid-weight pima cotton with a cropped, boxy silhouette. Tonal chest embroidery and a clean hem stitch.',
+    sizes: SIZES.apparel, colors: ['slate', 'black'] },
+  { slug: 'arc-logo-tee', name: 'ARC LOGO TEE', cat: 'tops', brand: 'arcane', price: 2799, orig: 3499, icon: '◯', tag: '',  badges: [],
+    desc: 'Soft-hand 220gsm jersey with reflective ARC monogram on the chest. Regular fit through body and sleeve.',
+    sizes: SIZES.apparel, colors: ['white', 'sand', 'black'] },
+
+  // ── Hoodies ─────────────────────────────────────────────
+  { slug: 'shadow-hoodie', name: 'SHADOW HOODIE', cat: 'tops', brand: 'story', price: 7499, orig: 9499, icon: '◐', tag: 'NEW', badges: ['NEW'],
+    desc: 'Brushed-fleece interior, dropped shoulder, kangaroo pocket and self-fabric drawcord. Cut for a relaxed silhouette.',
+    sizes: SIZES.apparel, colors: ['black', 'slate'] },
+  { slug: 'atlas-pullover', name: 'ATLAS PULLOVER', cat: 'tops', brand: 'monolith', price: 6499, orig: 8499, icon: '◉', tag: 'SALE', badges: ['SALE'],
+    desc: 'Heavyweight French terry with a clean half-zip placket. Sand-washed for a soft, faded finish.',
+    sizes: SIZES.apparel, colors: ['sand', 'black'] },
+  { slug: 'halo-zip-hoodie', name: 'HALO ZIP HOODIE', cat: 'tops', brand: 'halo', price: 8499, orig: 10999, icon: '◇', tag: '', badges: [],
+    desc: 'Full-zip hoodie cut from Italian loop-back cotton. Concealed YKK zip and side seam pockets.',
+    sizes: SIZES.apparel, colors: ['slate', 'white'] },
+
+  // ── Jackets ─────────────────────────────────────────────
+  { slug: 'terrain-shell-jacket', name: 'TERRAIN SHELL JACKET', cat: 'outerwear', brand: 'story', price: 15999, orig: 19999, icon: '◆', tag: 'LIMITED', badges: ['HOT'],
+    desc: 'Waterproof 3-layer nylon shell with sealed seams and a packable construction. Adjustable storm hood.',
+    sizes: SIZES.outerwear, colors: ['black', 'slate'] },
+  { slug: 'obsidian-blazer', name: 'OBSIDIAN BLAZER', cat: 'outerwear', brand: 'arcane', price: 12999, orig: 16999, icon: '◈', tag: 'BESTSELLER', badges: [],
+    desc: 'Unstructured blazer in mid-weight wool blend. Patch pockets, single vent, horn buttons.',
+    sizes: SIZES.outerwear, colors: ['black', 'sand'] },
+  { slug: 'north-parka', name: 'NORTH PARKA', cat: 'outerwear', brand: 'vesper', price: 18999, orig: 24999, icon: '◇', tag: 'NEW', badges: ['NEW'],
+    desc: 'Premium recycled-down parka with rib-knit cuffs and a removable fur trim. Built for sub-zero comfort.',
+    sizes: SIZES.outerwear, colors: ['slate', 'ink'] },
+
+  // ── Sneakers ────────────────────────────────────────────
+  { slug: 'phantom-runner-v2', name: 'PHANTOM RUNNER V2', cat: 'shoes', brand: 'story', price: 8999, orig: 11999, icon: '◎', tag: 'NEW', badges: ['NEW'],
+    desc: 'Ultralight performance runner with reactive foam sole, breathable engineered mesh upper and a dual-density heel.',
+    sizes: SIZES.shoes, colors: ['black', 'white'] },
+  { slug: 'arc-sneaker-lo', name: 'ARC SNEAKER LO', cat: 'shoes', brand: 'arcane', price: 9999, orig: 12999, icon: '◯', tag: '', badges: [],
+    desc: 'Low-top vulcanized silhouette with suede toe-cap, gum sole, and a tonal embroidered arc on the side panel.',
+    sizes: SIZES.shoes, colors: ['black', 'sand'] },
+  { slug: 'axis-court', name: 'AXIS COURT', cat: 'shoes', brand: 'axis', price: 7999, orig: 9999, icon: '◉', tag: 'SALE', badges: ['SALE'],
+    desc: 'Minimal court silhouette in tumbled leather. Cup-sole construction with a perforated toe-box.',
+    sizes: SIZES.shoes, colors: ['white', 'slate'] },
+
+  // ── Watches ─────────────────────────────────────────────
+  { slug: 'vesper-noir-automatic', name: 'VESPER NOIR AUTOMATIC', cat: 'watches', brand: 'vesper', price: 24999, orig: 29999, icon: '◴', tag: 'HOT', badges: ['HOT'],
+    desc: 'Swiss-movement automatic with a brushed-steel case, sapphire crystal and 50m water resistance. Black sunburst dial.',
+    sizes: SIZES.watch, colors: ['black', 'slate'] },
+  { slug: 'axis-chronograph', name: 'AXIS CHRONOGRAPH', cat: 'watches', brand: 'axis', price: 18999, orig: 22999, icon: '◵', tag: '', badges: [],
+    desc: 'Multifunction chronograph with three sub-dials, tachymeter bezel and a brushed bracelet. Ronda Swiss quartz movement.',
+    sizes: SIZES.watch, colors: ['black', 'white'] },
+
+  // ── Bags ────────────────────────────────────────────────
+  { slug: 'void-duffle', name: 'VOID DUFFLE', cat: 'bags', brand: 'void', price: 11999, orig: 14999, icon: '▣', tag: 'NEW', badges: ['NEW'],
+    desc: 'Weather-resistant 1000D nylon duffle with leather trim, magnetic closures and a detachable shoulder strap.',
+    sizes: SIZES.one, colors: ['black', 'slate'] },
+  { slug: 'monolith-weekender', name: 'MONOLITH WEEKENDER', cat: 'bags', brand: 'monolith', price: 14999, orig: 18999, icon: '▢', tag: '', badges: [],
+    desc: 'Italian full-grain leather weekender with brass hardware, padded laptop sleeve and a structured base.',
+    sizes: SIZES.one, colors: ['sand', 'black'] },
+
+  // ── Accessories ─────────────────────────────────────────
+  { slug: 'signal-cap', name: 'SIGNAL CAP', cat: 'accessories', brand: 'monolith', price: 1999, orig: 2499, icon: '◇', tag: '', badges: [],
+    desc: 'Six-panel structured cap in washed cotton twill. Tonal embroidery and an antique-brass adjustable strap.',
+    sizes: SIZES.one, colors: ['black', 'white', 'sand'] },
+  { slug: 'arc-leather-belt', name: 'ARC LEATHER BELT', cat: 'accessories', brand: 'arcane', price: 4499, orig: 5999, icon: '◇', tag: 'SALE', badges: ['SALE'],
+    desc: 'Italian vegetable-tanned leather belt with a brushed-steel arc buckle. Slim 30mm width.',
+    sizes: SIZES.belt, colors: ['black', 'sand'] },
+];
+
 function seedData(db) {
   const already = db.prepare('SELECT COUNT(*) as c FROM categories').get();
   if (already.c > 0) return;
 
+  // ── Categories ──
   const cats = [
-    { id: uuid(), slug: 'shoes', label: 'Shoes' },
-    { id: uuid(), slug: 'tops', label: 'Tops' },
-    { id: uuid(), slug: 'bottoms', label: 'Bottoms' },
-    { id: uuid(), slug: 'outerwear', label: 'Outerwear' },
-    { id: uuid(), slug: 'accessories', label: 'Accessories' },
-  ];
+    { slug: 'shoes',       label: 'Sneakers'    },
+    { slug: 'tops',        label: 'Tops'        },
+    { slug: 'bottoms',     label: 'Bottoms'     },
+    { slug: 'outerwear',   label: 'Outerwear'   },
+    { slug: 'watches',     label: 'Watches'     },
+    { slug: 'bags',        label: 'Bags'        },
+    { slug: 'accessories', label: 'Accessories' },
+  ].map(c => ({ id: uuid(), ...c }));
   const catStmt = db.prepare('INSERT INTO categories (id,slug,label) VALUES (?,?,?)');
   cats.forEach(c => catStmt.run(c.id, c.slug, c.label));
 
+  // ── Brands ──
   const brands = [
-    { id: uuid(), slug: 'story', name: 'STORY™' },
-    { id: uuid(), slug: 'arcane', name: 'ARCANE' },
-    { id: uuid(), slug: 'monolith', name: 'MONOLITH' },
-    { id: uuid(), slug: 'void', name: 'VOID' },
-  ];
+    { slug: 'story',    name: 'STORY™'   },
+    { slug: 'arcane',   name: 'ARCANE'   },
+    { slug: 'monolith', name: 'MONOLITH' },
+    { slug: 'void',     name: 'VOID'     },
+    { slug: 'vesper',   name: 'VESPER'   },
+    { slug: 'axis',     name: 'AXIS'     },
+    { slug: 'halo',     name: 'HALO'     },
+  ].map(b => ({ id: uuid(), ...b }));
   const brandStmt = db.prepare('INSERT INTO brands (id,slug,name) VALUES (?,?,?)');
   brands.forEach(b => brandStmt.run(b.id, b.slug, b.name));
 
-  const products = [
-    { slug: 'phantom-runner-v2', name: 'PHANTOM RUNNER V2', price: 8999, orig: 11999, icon: '◎', tag: 'NEW', cat: 'shoes', brand: 'story', desc: 'Ultralight performance runner with reactive foam sole and breathable mesh upper.' },
-    { slug: 'obsidian-blazer', name: 'OBSIDIAN BLAZER', price: 12999, orig: 16999, icon: '◈', tag: 'BESTSELLER', cat: 'outerwear', brand: 'arcane', desc: 'Structured blazer in premium obsidian wool blend. Unlined for breathability.' },
-    { slug: 'void-cargo-pant', name: 'VOID CARGO PANT', price: 6499, orig: 8499, icon: '▣', tag: 'SALE', cat: 'bottoms', brand: 'void', desc: 'Technical cargo silhouette with zippered pockets and adjustable ankle cuffs.' },
-    { slug: 'monolith-tee', name: 'MONOLITH TEE', price: 2999, orig: 3999, icon: '◉', tag: '', cat: 'tops', brand: 'monolith', desc: 'Heavyweight 280gsm jersey tee. Preshrunk. Pigment-dyed for lived-in tone.' },
-    { slug: 'shadow-hoodie', name: 'SHADOW HOODIE', price: 7499, orig: 9499, icon: '◐', tag: 'NEW', cat: 'tops', brand: 'story', desc: 'Brushed fleece interior with dropped shoulder and kangaroo pocket.' },
-    { slug: 'arc-sneaker-lo', name: 'ARC SNEAKER LO', price: 9999, orig: 12999, icon: '◯', tag: '', cat: 'shoes', brand: 'arcane', desc: 'Low-top vulcanized silhouette with suede overlays and gum sole.' },
-    { slug: 'terrain-jacket', name: 'TERRAIN JACKET', price: 15999, orig: 19999, icon: '◆', tag: 'LIMITED', cat: 'outerwear', brand: 'story', desc: 'Waterproof nylon shell with sealed seams, packable into chest pocket.' },
-    { slug: 'signal-cap', name: 'SIGNAL CAP', price: 1999, orig: 2499, icon: '◇', tag: '', cat: 'accessories', brand: 'monolith', desc: 'Six-panel structured cap with tonal embroidery and adjustable strap.' },
-  ];
+  const catMap   = Object.fromEntries(cats.map(c => [c.slug, c.id]));
+  const brandMap = Object.fromEntries(brands.map(b => [b.slug, b.id]));
 
-  const sizes = { shoes: ['40','41','42','43','44','45'], tops: ['XS','S','M','L','XL','XXL'], bottoms: ['28','30','32','34','36'], outerwear: ['S','M','L','XL'], accessories: ['ONE SIZE'] };
-  const colors = [
-    { name: 'Black', hex: '#0a0a0a' },
-    { name: 'White', hex: '#f5f5f0' },
-    { name: 'Slate', hex: '#4a5568' },
-    { name: 'Sand', hex: '#c4a882' },
-  ];
-
-  const catMap = {};
-  cats.forEach(c => catMap[c.slug] = c.id);
-  const brandMap = {};
-  brands.forEach(b => brandMap[b.slug] = b.id);
+  // ── Insert products ──
+  const insertProduct = db.prepare(`
+    INSERT INTO products
+      (id, slug, name, description, price, orig_price, icon, image_url, images, badges, tag, brand_id, category_id)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `);
+  const insertSize  = db.prepare('INSERT INTO product_sizes (id,product_id,size) VALUES (?,?,?)');
+  const insertColor = db.prepare('INSERT INTO product_colors (id,product_id,color_name,color_hex) VALUES (?,?,?,?)');
+  const insertInv   = db.prepare('INSERT OR IGNORE INTO inventory (id,product_id,size,color_name,stock) VALUES (?,?,?,?,?)');
 
   const seedAll = db.transaction(() => {
-    products.forEach(p => {
-      const pid = uuid();
-      db.prepare('INSERT INTO products (id,slug,name,description,price,orig_price,icon,tag,brand_id,category_id) VALUES (?,?,?,?,?,?,?,?,?,?)')
-        .run(pid, p.slug, p.name, p.desc, p.price, p.orig, p.icon, p.tag, brandMap[p.brand], catMap[p.cat]);
+    CATALOGUE.forEach(p => {
+      const pid    = uuid();
+      const images = imageSet(p.slug);
+      insertProduct.run(
+        pid, p.slug, p.name, p.desc,
+        p.price, p.orig,
+        p.icon, images[0],
+        JSON.stringify(images),
+        JSON.stringify(p.badges || []),
+        p.tag || '',
+        brandMap[p.brand] || null,
+        catMap[p.cat] || null
+      );
 
-      const pSizes = sizes[p.cat] || sizes.tops;
-      pSizes.forEach(s => db.prepare('INSERT INTO product_sizes (id,product_id,size) VALUES (?,?,?)').run(uuid(), pid, s));
-      colors.forEach(c => db.prepare('INSERT INTO product_colors (id,product_id,color_name,color_hex) VALUES (?,?,?,?)').run(uuid(), pid, c.name, c.hex));
+      // sizes
+      p.sizes.forEach(s => insertSize.run(uuid(), pid, s));
 
-      pSizes.forEach(s => colors.forEach(c => {
-        db.prepare('INSERT OR IGNORE INTO inventory (id,product_id,size,color_name,stock) VALUES (?,?,?,?,?)')
-          .run(uuid(), pid, s, c.name, Math.floor(Math.random() * 20) + 5);
+      // colors
+      const colorList = p.colors.map(k => COLORS[k]);
+      colorList.forEach(c => insertColor.run(uuid(), pid, c.name, c.hex));
+
+      // stock — vary so cards naturally show low / urgent / fully stocked states
+      p.sizes.forEach((s, sIdx) => colorList.forEach((c, cIdx) => {
+        // bias: a few combos go OOS, a few go low (≤5), most are healthy
+        const seed = (sIdx * 7 + cIdx * 13 + p.slug.length) % 100;
+        let stock;
+        if (seed < 8)       stock = 0;
+        else if (seed < 22) stock = (seed % 4) + 2;     // 2..5 (low)
+        else if (seed < 50) stock = (seed % 8) + 8;     // 8..15
+        else                stock = (seed % 18) + 12;   // 12..29
+        insertInv.run(uuid(), pid, s, c.name, stock);
       }));
     });
 
+    // ── Admin user ──
     const hash = bcrypt.hashSync('admin123', 10);
     db.prepare('INSERT OR IGNORE INTO users (id,name,email,password,role) VALUES (?,?,?,?,?)')
       .run(uuid(), 'Admin', 'admin@story.com', hash, 'admin');
 
+    // ── Coupons ──
     [
-      { code: 'WELCOME10', type: 'percent', value: 10, min_order: 0, max_discount: 500 },
-      { code: 'FLAT500', type: 'flat', value: 500, min_order: 2000 },
-      { code: 'STORY20', type: 'percent', value: 20, min_order: 5000, max_discount: 2000 },
-    ].forEach(c => db.prepare('INSERT OR IGNORE INTO coupons (id,code,type,value,min_order,max_discount) VALUES (?,?,?,?,?,?)')
-      .run(uuid(), c.code, c.type, c.value, c.min_order || 0, c.max_discount || null));
+      { code: 'WELCOME10', type: 'percent', value: 10, min_order: 0,    max_discount: 500  },
+      { code: 'FLAT500',   type: 'flat',    value: 500, min_order: 2000                    },
+      { code: 'STORY20',   type: 'percent', value: 20, min_order: 5000, max_discount: 2000 },
+    ].forEach(c =>
+      db.prepare('INSERT OR IGNORE INTO coupons (id,code,type,value,min_order,max_discount) VALUES (?,?,?,?,?,?)')
+        .run(uuid(), c.code, c.type, c.value, c.min_order || 0, c.max_discount || null)
+    );
   });
 
   seedAll();
-  console.log('✅ Seed data inserted');
+  console.log(`✅ Seeded ${CATALOGUE.length} luxury products across ${cats.length} categories`);
 }

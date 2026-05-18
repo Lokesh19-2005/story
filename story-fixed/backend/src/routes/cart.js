@@ -7,11 +7,24 @@ import { authenticate } from '../middleware/auth.js';
 const router = Router();
 
 function getCart(userId, db) {
-  return db.prepare(`
-    SELECT c.*, p.name as product_name, p.price, p.slug, p.icon, p.tag
+  const rows = db.prepare(`
+    SELECT c.*, p.name as product_name, p.price, p.slug, p.icon, p.tag,
+           p.image_url, p.images
     FROM cart c JOIN products p ON c.product_id = p.id
     WHERE c.user_id = ? ORDER BY c.added_at DESC
   `).all(userId);
+
+  // Normalise images so the frontend always has an `images` array + image_url
+  return rows.map(r => {
+    let images = [];
+    if (typeof r.images === 'string' && r.images.length) {
+      try { const j = JSON.parse(r.images); if (Array.isArray(j)) images = j; } catch {}
+    } else if (Array.isArray(r.images)) {
+      images = r.images;
+    }
+    if (images.length === 0 && r.image_url) images = [r.image_url];
+    return { ...r, images };
+  });
 }
 
 router.get('/', authenticate, (req, res) => {

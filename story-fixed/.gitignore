@@ -2,3 +2,7 @@ node_modules
 dist
 .vite
 .env
+
+backend/story.db
+backend/story.db-shm
+backend/story.db-wal
