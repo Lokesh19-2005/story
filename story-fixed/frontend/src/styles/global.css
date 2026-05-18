@@ -1659,3 +1659,211 @@ a { color: inherit; text-decoration: none; }
   .pd2-related-title { font-size: 28px; }
   .pd2-tabs { gap: 16px; }
 }
+
+
+
+/* ══════════════════════════════════════════════════
+   STOCK UX — premium cues across all surfaces
+══════════════════════════════════════════════════ */
+
+/* Subtle pulse used for urgency dots */
+@keyframes stockPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .55; transform: scale(.85); }
+}
+
+/* — Tone tokens (kept restrained for luxury feel) — */
+:root {
+  --stock-low:  #b85c38;   /* warm terracotta */
+  --stock-oos:  #8a1a1a;   /* deep oxblood */
+  --stock-ok:   #2a6b3a;   /* muted sage */
+}
+
+/* ─── Sold-out overlay on ProductCard image ─────────── */
+.pc-img .pc-soldout {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.62);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+.pc-soldout-tag {
+  font-family: var(--fm);
+  font-size: 9px;
+  letter-spacing: .35em;
+  font-weight: 700;
+  color: #111;
+  background: #fff;
+  border: 1px solid #111;
+  padding: 8px 14px;
+  text-transform: uppercase;
+}
+
+/* Stock micro-line inside ProductCard body */
+.pc-stock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fm);
+  font-size: 8.5px;
+  letter-spacing: .12em;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 8px;
+  color: var(--stock-low);
+}
+.pc-stock-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  animation: stockPulse 1.6s ease-in-out infinite;
+}
+
+/* ─── Detail page stock messaging ───────────────────── */
+.pd2-stock-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  font-family: var(--fm);
+  font-size: 9px;
+  letter-spacing: .14em;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  background: rgba(255,255,255,.6);
+}
+.pd2-stock-counter--low { color: var(--stock-low); }
+.pd2-stock-counter--oos { color: var(--stock-oos); }
+.pd2-stock-counter-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  animation: stockPulse 1.6s ease-in-out infinite;
+}
+
+/* When PDP variant is OOS, dim the qty stepper */
+.pd2-qty.is-disabled {
+  opacity: .45;
+  pointer-events: none;
+  filter: grayscale(.4);
+}
+
+/* PDP urgency strip below sizes */
+.pd2-urgency {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: #faf6f3;
+  border: 1px solid #f0e1d8;
+  font-family: var(--fm);
+  font-size: 9.5px;
+  letter-spacing: .04em;
+  color: #6a3a25;
+}
+.pd2-urgency-icon {
+  width: 16px; height: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--stock-low);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ─── Cart line stock badges (drawer + page) ────────── */
+.cart-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fm);
+  font-size: 8.5px;
+  letter-spacing: .14em;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  margin-top: 8px;
+}
+.cart-stock-badge--low  { color: var(--stock-low); background: rgba(184,92,56,.04); }
+.cart-stock-badge--oos  { color: var(--stock-oos); background: rgba(138,26,26,.04); }
+.cart-stock-badge--over { color: var(--stock-oos); background: rgba(138,26,26,.04); }
+.cart-stock-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  animation: stockPulse 1.6s ease-in-out infinite;
+}
+
+/* When a cart line cannot proceed, fade the visuals */
+.cart-line-blocked {
+  position: relative;
+}
+.cart-line-blocked .cart-line-thumb {
+  opacity: .6;
+  filter: grayscale(.5);
+}
+.cart-line-blocked .cart-line-name,
+.cart-line-blocked .cart-line-price {
+  color: #999;
+}
+
+/* Disabled qty button (e.g. cap reached) */
+.qty-btn-disabled {
+  opacity: .35;
+  cursor: not-allowed !important;
+}
+
+/* ─── Checkout-side warning panel ───────────────────── */
+.checkout-stock-warn {
+  background: #fbf2ee;
+  border: 1px solid #ecd9cd;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  font-family: var(--fm);
+  font-size: 10px;
+  color: #6a3a25;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  line-height: 1.7;
+}
+.checkout-stock-warn--err {
+  background: #fdf3f2;
+  border-color: #ecd0cd;
+  color: #6e1e1e;
+}
+.checkout-stock-warn-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: currentColor;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.checkout-stock-warn--err .checkout-stock-warn-icon { background: var(--stock-oos); }
+.checkout-stock-warn:not(.checkout-stock-warn--err) .checkout-stock-warn-icon { background: var(--stock-low); }
+.checkout-stock-warn-link {
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* Disabled CTAs */
+.btn-k:disabled, .pd2-cta:disabled {
+  background: #d6d6d4;
+  color: #fff;
+  cursor: not-allowed;
+}

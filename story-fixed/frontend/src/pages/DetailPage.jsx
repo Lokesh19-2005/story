@@ -77,6 +77,19 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
 
   useEffect(() => { loadProduct(); }, [loadProduct]);
 
+  // Clamp qty when the selected variant's stock shrinks below current qty.
+  useEffect(() => {
+    if (!product) return;
+    const k = selSize && selColor?.color_name ? `${selSize}__${selColor.color_name}` : null;
+    if (!k) return;
+    const has = Object.prototype.hasOwnProperty.call(product.stockMap, k);
+    if (!has) return;
+    const max = product.stockMap[k];
+    if (typeof max === 'number' && qty > Math.max(1, max)) {
+      setQty(Math.max(1, max || 1));
+    }
+  }, [selSize, selColor, product, qty]);
+
   // Build a 4-frame gallery (placeholder shades) so the layout reads like a real PDP
   // without inventing image assets. Each frame uses the same product icon.
   const frames = useMemo(() => ([
@@ -111,15 +124,22 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
 
   const discount = pct(product.orig_price, product.price);
   const stockKey = selSize && selColor?.color_name ? `${selSize}__${selColor.color_name}` : null;
-  const stockQty = stockKey ? (product.stockMap[stockKey] ?? 99) : 99;
-  const isOOS    = stockQty === 0;
+  const hasStock = stockKey && Object.prototype.hasOwnProperty.call(product.stockMap, stockKey);
+  const stockQty = hasStock ? product.stockMap[stockKey] : 99;
+  const isOOS    = hasStock && stockQty === 0;
+  const isLow    = hasStock && stockQty > 0 && stockQty <= 5;
   const savings  = discount > 0 ? (product.orig_price || 0) - (product.price || 0) : 0;
+  const maxQty   = hasStock ? Math.max(1, stockQty) : 99;
 
   const handleAdd = async () => {
     if (!selSize)   { setMsg('Please select a size');  return; }
     if (!selColor)  { setMsg('Please select a colour'); return; }
     if (!isLoggedIn){ setPage('auth'); return; }
     if (isOOS)      { setMsg('This variant is out of stock'); return; }
+    if (hasStock && qty > stockQty) {
+      setMsg(`Only ${stockQty} unit${stockQty !== 1 ? 's' : ''} available in this size & colour`);
+      return;
+    }
 
     setAdding(true);
     setMsg('');
@@ -297,23 +317,39 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
                   );
                 })}
               </div>
-              {isOOS && selSize && (
-                <div className="pd2-stock pd2-stock--oos">This size is out of stock</div>
+              {hasStock && isOOS && selSize && (
+                <div className="pd2-stock-counter pd2-stock-counter--oos" role="status" aria-live="polite">
+                  <span className="pd2-stock-counter-dot" aria-hidden="true" />
+                  Out of stock — try another size
+                </div>
               )}
-              {!isOOS && selSize && stockQty <= 5 && stockQty > 0 && (
-                <div className="pd2-stock pd2-stock--low">Only {stockQty} left in stock</div>
+              {hasStock && isLow && selSize && (
+                <>
+                  <div className="pd2-stock-counter pd2-stock-counter--low" role="status" aria-live="polite">
+                    <span className="pd2-stock-counter-dot" aria-hidden="true" />
+                    Only {stockQty} left
+                  </div>
+                  <div className="pd2-urgency" role="status">
+                    <span className="pd2-urgency-icon" aria-hidden="true">!</span>
+                    <span>Selling fast in this size — only {stockQty} unit{stockQty !== 1 ? 's' : ''} remaining.</span>
+                  </div>
+                </>
               )}
             </div>
           )}
 
           {/* Quantity + CTAs */}
           <div className="pd2-buy">
-            <div className="pd2-qty" aria-label="Quantity">
+            <div className={`pd2-qty${isOOS ? ' is-disabled' : ''}`} aria-label="Quantity" aria-disabled={isOOS ? 'true' : undefined}>
               <button type="button" aria-label="Decrease quantity"
+                disabled={isOOS || qty <= 1}
+                className={qty <= 1 ? 'qty-btn-disabled' : ''}
                 onClick={() => setQty(Math.max(1, qty - 1))}>\u2212</button>
               <span className="pd2-qty-value">{qty}</span>
               <button type="button" aria-label="Increase quantity"
-                onClick={() => setQty(Math.min(stockQty || 99, qty + 1))}>+</button>
+                disabled={isOOS || qty >= maxQty}
+                className={qty >= maxQty ? 'qty-btn-disabled' : ''}
+                onClick={() => setQty(Math.min(maxQty, qty + 1))}>+</button>
             </div>
 
             <button className="pd2-cta" onClick={handleAdd} disabled={adding || isOOS}>

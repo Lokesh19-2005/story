@@ -9,6 +9,13 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
   const isSale    = discount > 0;
   const isSoldOut = product.in_stock === 0 || product.sold_out === 1;
 
+  // Optional aggregate stock signal (only used if backend exposes it).
+  // We never invent stock. Only treat numbers <= 5 (and > 0) as "low".
+  const totalStock = (typeof product.total_stock === 'number')
+    ? product.total_stock
+    : (typeof product.stock === 'number' ? product.stock : null);
+  const isLow = !isSoldOut && totalStock !== null && totalStock > 0 && totalStock <= 5;
+
   // Single priority badge for a clean luxury look
   const badge = isSoldOut
     ? { kind: 'soldout', label: 'SOLD OUT' }
@@ -41,6 +48,7 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
       role="button"
       tabIndex={0}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick && onClick(); } }}
+      aria-disabled={isSoldOut ? 'true' : undefined}
     >
       {/* Image / media */}
       <div className="pc-img">
@@ -48,8 +56,15 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
           <span className="pc-icon">{product.icon || '\u25C9'}</span>
         </div>
 
+        {/* Sold-out luxury overlay */}
+        {isSoldOut && (
+          <div className="pc-soldout" aria-hidden="true">
+            <span className="pc-soldout-tag">SOLD OUT</span>
+          </div>
+        )}
+
         {/* Single priority badge (top-left, hairline) */}
-        {badge && (
+        {badge && !isSoldOut && (
           <span className={`pc-badge pc-badge--${badge.kind}`}>{badge.label}</span>
         )}
 
@@ -71,9 +86,10 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
             type="button"
             className="pc-quick-btn"
             disabled={isSoldOut}
+            aria-disabled={isSoldOut ? 'true' : undefined}
             onClick={handleQuickAdd}
           >
-            {isSoldOut ? 'SOLD OUT' : 'QUICK ADD'}
+            {isSoldOut ? 'NOTIFY ME' : 'QUICK ADD'}
           </button>
         </div>
       </div>
@@ -99,6 +115,14 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
               />
             ))}
             {more > 0 && <span className="pc-colors-more">+{more}</span>}
+          </div>
+        )}
+
+        {/* Low-stock hint — only when backend exposes count */}
+        {isLow && (
+          <div className="pc-stock" role="status" aria-live="polite">
+            <span className="pc-stock-dot" aria-hidden="true" />
+            ONLY {totalStock} LEFT
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@ import { ordersAPI, couponAPI, paymentAPI } from '../services/api.js';
 import { fp } from '../utils.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import { useCartStock } from '../hooks/useCartStock.js';
 
 const GST_RATE = 0.18;
 const SHIPPING = { standard: 99, express: 199, sameday: 299 };
@@ -49,6 +50,8 @@ function loadRazorpayScript() {
 export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlaceOrder, toast }) {
   const { isLoggedIn } = useAuth();
   const t = toast || (() => {});
+
+  const { hasIssues: stockHasIssues, issues: stockIssues, statusByLineId, stockByLineId } = useCartStock(cart);
 
   const [step, setStep]             = useState(1);
   const [form, setForm]             = useState({
@@ -186,6 +189,11 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
 
   // ── Place order
   const handlePlace = async () => {
+    if (stockHasIssues) {
+      setErr('Some items are no longer available in the requested quantity. Please return to your bag.');
+      t('Stock changed — please review your bag', 'error');
+      return;
+    }
     const valErr = validateAddress();
     if (valErr) { setErr(valErr); return; }
     setPlacing(true);
@@ -217,6 +225,10 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
   };
 
   const goToPayment = () => {
+    if (stockHasIssues) {
+      setErr('Some items in your bag are out of stock or have changed availability. Please return to your bag.');
+      return;
+    }
     const e = validateAddress();
     if (e) { setErr(e); return; }
     setErr('');
@@ -244,6 +256,17 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 40 }}>
         <div>
+
+          {stockHasIssues && (
+            <div className="checkout-stock-warn checkout-stock-warn--err" style={{ marginBottom: 24 }}>
+              <span className="checkout-stock-warn-icon">!</span>
+              <span>
+                <strong>Stock has changed.</strong>{' '}
+                {stockIssues.length === 1 ? '1 item' : `${stockIssues.length} items`} in your bag {stockIssues.length === 1 ? 'is' : 'are'} no longer available in the requested quantity.{' '}
+                <span className="checkout-stock-warn-link" onClick={() => setPage('cart')}>Return to bag</span> to update.
+              </span>
+            </div>
+          )}
 
           {/* STEP 1 — Delivery */}
           {step === 1 && (
@@ -285,8 +308,8 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
               </div>
 
               {err && <div style={{ padding: '12px 16px', background: '#fee2e2', fontFamily: 'var(--fm)', fontSize: '8px', color: '#991b1b', marginTop: 16, borderRadius: 2 }}>{err}</div>}
-              <button className="btn btn-k" style={{ width: '100%', marginTop: 24 }} onClick={goToPayment}>
-                CONTINUE TO PAYMENT →
+              <button className="btn btn-k" style={{ width: '100%', marginTop: 24 }} onClick={goToPayment} disabled={stockHasIssues}>
+                {stockHasIssues ? 'STOCK ISSUES — REVIEW BAG' : 'CONTINUE TO PAYMENT →'}
               </button>
             </div>
           )}
@@ -335,8 +358,8 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
 
               {err && <div style={{ padding: '12px 16px', background: '#fee2e2', fontFamily: 'var(--fm)', fontSize: '8px', color: '#991b1b', marginTop: 16, borderRadius: 2 }}>{err}</div>}
 
-              <button className="btn btn-k" style={{ width: '100%', marginTop: 24 }} onClick={handlePlace} disabled={placing}>
-                {placing ? 'PROCESSING...' : payMethod === 'online' ? `PAY ${fp(total)} →` : `PLACE ORDER ${fp(total)} →`}
+              <button className="btn btn-k" style={{ width: '100%', marginTop: 24 }} onClick={handlePlace} disabled={placing || stockHasIssues}>
+                {placing ? 'PROCESSING...' : stockHasIssues ? 'STOCK ISSUES — REVIEW BAG' : (payMethod === 'online' ? `PAY ${fp(total)} →` : `PLACE ORDER ${fp(total)} →`)}
               </button>
               <button className="btn btn-w" style={{ width: '100%', marginTop: 10 }} onClick={() => { setErr(''); setStep(1); }}>← BACK</button>
             </div>
@@ -348,21 +371,41 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
           <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.2em', marginBottom: 16 }}>
             ORDER SUMMARY ({cart.length} item{cart.length !== 1 ? 's' : ''})
           </div>
-          {cart.map(item => (
-            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: 'var(--fm)', fontSize: '8.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {item.product_name || item.name}
+          {cart.map(item => {
+            const status = statusByLineId[item.id];
+            const stock  = stockByLineId[item.id];
+            const cap = (typeof stock === 'number' && stock !== Infinity) ? stock : null;
+            return (
+              <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '8.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {item.product_name || item.name}
+                  </div>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '7.5px', color: 'var(--warm)', marginTop: 2 }}>
+                    {item.size} · {item.color_name} × {item.quantity}
+                  </div>
+                  {status === 'oos' && (
+                    <div style={{ fontFamily:'var(--fm)', fontSize:'7.5px', letterSpacing:'.15em', color:'var(--stock-oos, #8a1a1a)', fontWeight:700, marginTop:4 }}>
+                      • OUT OF STOCK
+                    </div>
+                  )}
+                  {status === 'over' && cap !== null && (
+                    <div style={{ fontFamily:'var(--fm)', fontSize:'7.5px', letterSpacing:'.15em', color:'var(--stock-oos, #8a1a1a)', fontWeight:700, marginTop:4 }}>
+                      • ONLY {cap} AVAILABLE
+                    </div>
+                  )}
+                  {status === 'low' && cap !== null && (
+                    <div style={{ fontFamily:'var(--fm)', fontSize:'7.5px', letterSpacing:'.15em', color:'var(--stock-low, #b85c38)', fontWeight:700, marginTop:4 }}>
+                      • ONLY {cap} LEFT
+                    </div>
+                  )}
                 </div>
-                <div style={{ fontFamily: 'var(--fm)', fontSize: '7.5px', color: 'var(--warm)', marginTop: 2 }}>
-                  {item.size} · {item.color_name} × {item.quantity}
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '8.5px', whiteSpace: 'nowrap' }}>
+                  {fp((item.price || 0) * item.quantity)}
                 </div>
               </div>
-              <div style={{ fontFamily: 'var(--fm)', fontSize: '8.5px', whiteSpace: 'nowrap' }}>
-                {fp((item.price || 0) * item.quantity)}
-              </div>
-            </div>
-          ))}
+            );
+          })}
           <div style={{ borderTop: 'var(--bd)', paddingTop: 14, marginTop: 6 }}>
             {[
               { k: 'Subtotal',  v: fp(subtotal), lc: 'var(--warm)', vc: 'inherit' },
