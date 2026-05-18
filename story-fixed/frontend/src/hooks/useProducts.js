@@ -1,5 +1,5 @@
 // src/hooks/useProducts.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { productsAPI } from '../services/api';
 
 export function useProducts(params = {}) {
@@ -8,13 +8,22 @@ export function useProducts(params = {}) {
   const [error, setError]       = useState(null);
   const key = JSON.stringify(params);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     setLoading(true);
     productsAPI.list(params)
-      .then(d => { setProducts(d.products || []); setError(null); })
-      .catch(e => setError(e.message))
+      .then(d => {
+        setProducts(Array.isArray(d?.products) ? d.products : []);
+        setError(null);
+      })
+      .catch(e => {
+        setProducts([]);
+        setError(e?.message || 'Failed to load products');
+      })
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  return { products, loading, error };
+  useEffect(() => { load(); }, [load]);
+
+  return { products, loading, error, refetch: load };
 }
