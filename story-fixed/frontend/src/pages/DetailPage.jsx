@@ -1,5 +1,5 @@
 // src/pages/DetailPage.jsx — Product Detail with Stock Display
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { productsAPI } from '../services/api.js';
 import { fp, pct } from '../utils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -11,6 +11,7 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
   const [product, setProduct]   = useState(null);
   const [related, setRelated]   = useState([]);
   const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
   const [selSize, setSelSize]   = useState('');
   const [selColor, setSelColor] = useState(null);
   const [qty, setQty]           = useState(1);
@@ -18,49 +19,93 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
   const [msg, setMsg]           = useState('');
   const [tab, setTab]           = useState('details');
 
-  useEffect(() => {
-    if (!productId) return;
+  const loadProduct = useCallback(async () => {
+    if (!productId) {
+      setError('No product selected');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError(null);
     setMsg('');
     setSelSize('');
     setSelColor(null);
     setQty(1);
 
-    // Fetch all products to find by id, then get detail by slug
-    productsAPI.list({ limit: 100 })
-      .then(d => {
-        const p = d.products.find(x => String(x.id) === String(productId));
-        if (!p) throw new Error('Product not found');
-        return productsAPI.detail(p.slug);
-      })
-      .then(d => {
-        const p = d.product;
-        setProduct(p);
-        setSelSize(p.sizes?.[0] || '');
-        setSelColor(p.colors?.[0] || null);
-        // Load related
-        productsAPI.related(p.slug)
-          .then(r => setRelated(r.products || []))
-          .catch(() => {});
-      })
-      .catch(err => { console.warn('[DetailPage fetch]', err?.message); })
-      .finally(() => setLoading(false));
+    try {
+      // Fetch all products to find by id, then get detail by slug
+      const listRes = await productsAPI.list({ limit: 100 });
+      const list = Array.isArray(listRes?.products) ? listRes.products : [];
+      const match = list.find(x => String(x?.id) === String(productId));
+      if (!match || !match.slug) {
+        throw new Error('Product not found');
+      }
+
+      const detailRes = await productsAPI.detail(match.slug);
+      const p = detailRes?.product;
+      if (!p) {
+        throw new Error('Product details unavailable');
+      }
+
+      // Normalize fields so downstream rendering is always safe
+      const safeProduct = {
+        ...p,
+        sizes:    Array.isArray(p.sizes)  ? p.sizes  : [],
+        colors:   Array.isArray(p.colors) ? p.colors : [],
+        stockMap: p.stockMap && typeof p.stockMap === 'object' ? p.stockMap : {},
+      };
+
+      setProduct(safeProduct);
+      setSelSize(safeProduct.sizes[0] || '');
+      setSelColor(safeProduct.colors[0] || null);
+
+      // Load related — failure here should not break the page
+      productsAPI.related(safeProduct.slug)
+        .then(r => setRelated(Array.isArray(r?.products) ? r.products : []))
+        .catch(err => { console.warn('[DetailPage related]', err?.message); setRelated([]); });
+    } catch (err) {
+      console.warn('[DetailPage fetch]', err?.message);
+      setError(err?.message || 'Failed to load product');
+      setProduct(null);
+    } finally {
+      setLoading(false);
+    }
   }, [productId]);
 
+  useEffect(() => { loadProduct(); }, [loadProduct]);
+
   if (loading) return <LoadingScreen message="LOADING PRODUCT..." />;
-  if (!product) return (
-    <div style={{ textAlign:'center', padding:'120px 20px' }}>
-      <div style={{ fontFamily:'var(--fm)', fontSize:'11px', letterSpacing:'.2em', marginBottom:24 }}>PRODUCT NOT FOUND</div>
-      <button className="btn btn-k" onClick={() => setPage('shop')}>← BACK TO SHOP</button>
-    </div>
-  );
+
+  if (error || !product) {
+    const isNotFound = error === 'Product not found' || !product;
+    return (
+      <div style={{ textAlign:'center', padding:'120px 20px', maxWidth:520, margin:'0 auto' }}>
+        <div style={{ fontSize:48, opacity:.2, marginBottom:24 }}>◎</div>
+        <div style={{ fontFamily:'var(--fm)', fontSize:'11px', letterSpacing:'.2em', marginBottom:12 }}>
+          {isNotFound ? 'PRODUCT NOT FOUND' : 'COULDN\u2019T LOAD PRODUCT'}
+        </div>
+        <div style={{ fontFamily:'var(--fm)', fontSize:'9px', letterSpacing:'.05em', color:'var(--warm)', marginBottom:32, lineHeight:1.8 }}>
+          {isNotFound
+            ? 'This product is no longer available or has been removed.'
+            : (error || 'Something went wrong while loading this product. Please try again.')}
+        </div>
+        <div style={{ display:'flex', gap:12, justifyContent:'center', flexWrap:'wrap' }}>
+          {!isNotFound && (
+            <button className="btn btn-w" onClick={loadProduct} style={{ fontSize:'8.5px' }}>RETRY</button>
+          )}
+          <button className="btn btn-k" onClick={() => setPage('shop')} style={{ fontSize:'8.5px' }}>← BACK TO SHOP</button>
+        </div>
+      </div>
+    );
+  }
 
   const discount = pct(product.orig_price, product.price);
 
-  // Stock check
-  const stockKey = selSize && selColor ? `${selSize}__${selColor.color_name}` : null;
-  const stockQty = stockKey && product.stockMap ? (product.stockMap[stockKey] ?? 99) : 99;
-  const isOOS    = stockQty === 0;
+  // Stock check — safe lookups
+  const stockKey  = selSize && selColor?.color_name ? `${selSize}__${selColor.color_name}` : null;
+  const stockQty  = stockKey ? (product.stockMap[stockKey] ?? 99) : 99;
+  const isOOS     = stockQty === 0;
 
   const handleAdd = async () => {
     if (!selSize) { setMsg('Please select a size'); return; }
@@ -70,15 +115,21 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
 
     setAdding(true);
     setMsg('');
-    const success = await addCart(product, selSize, selColor);
-    setAdding(false);
-    if (success) {
-      setMsg('Added to bag!');
-      if (toast) toast('Added to bag! 🛍', 'success');
-      openDrawer();
-      setTimeout(() => setMsg(''), 3000);
-    } else {
+    try {
+      const success = await addCart(product, selSize, selColor);
+      if (success) {
+        setMsg('Added to bag!');
+        if (toast) toast('Added to bag! \uD83D\uDED2', 'success');
+        openDrawer();
+        setTimeout(() => setMsg(''), 3000);
+      } else {
+        setMsg('Could not add to bag. Please try again.');
+      }
+    } catch (e) {
+      console.warn('[DetailPage addCart]', e?.message);
       setMsg('Could not add to bag. Please try again.');
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -88,16 +139,16 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
       <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.1em', color: 'var(--warm)', marginBottom: 40 }}>
         <span style={{ cursor: 'pointer' }} onClick={() => setPage('shop')}>SHOP</span>
         {' / '}
-        <span style={{ cursor: 'pointer' }} onClick={() => setPage('shop')}>{product.category_label?.toUpperCase()}</span>
+        <span style={{ cursor: 'pointer' }} onClick={() => setPage('shop')}>{(product.category_label || 'ALL').toUpperCase()}</span>
         {' / '}
-        <span style={{ color: '#111' }}>{product.name}</span>
+        <span style={{ color: '#111' }}>{product.name || ''}</span>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }}>
         {/* Left — Product Image */}
         <div>
           <div style={{ background: 'var(--off)', aspectRatio: '4/5', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', border: 'var(--bd)' }}>
-            <span style={{ fontSize: 140, opacity: .14 }}>{product.icon || '◉'}</span>
+            <span style={{ fontSize: 140, opacity: .14 }}>{product.icon || '\u25C9'}</span>
             {product.tag && (
               <div style={{ position: 'absolute', top: 20, left: 20, background: '#111', color: '#fff', fontFamily: 'var(--fm)', fontSize: '7px', letterSpacing: '.2em', padding: '4px 12px' }}>
                 {product.tag}
@@ -111,15 +162,15 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
             <button
               onClick={() => togWish && togWish(product.id)}
               style={{ position: 'absolute', bottom: 20, right: 20, background: '#fff', border: 'var(--bd)', width: 40, height: 40, cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isWish(product.id) ? '♥' : '♡'}
+              {isWish && isWish(product.id) ? '\u2665' : '\u2661'}
             </button>
           </div>
         </div>
 
         {/* Right — Product Info */}
         <div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.2em', color: 'var(--warm)', marginBottom: 8 }}>{product.brand}</div>
-          <h1 style={{ fontFamily: 'var(--fs)', fontSize: '32px', fontWeight: 300, letterSpacing: '-.01em', marginBottom: 20, lineHeight: 1.2 }}>{product.name}</h1>
+          <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.2em', color: 'var(--warm)', marginBottom: 8 }}>{product.brand || ''}</div>
+          <h1 style={{ fontFamily: 'var(--fs)', fontSize: '32px', fontWeight: 300, letterSpacing: '-.01em', marginBottom: 20, lineHeight: 1.2 }}>{product.name || 'Untitled product'}</h1>
 
           {/* Price */}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 32 }}>
@@ -128,12 +179,12 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
               <span style={{ fontFamily: 'var(--fm)', fontSize: '13px', color: 'var(--warm)', textDecoration: 'line-through' }}>{fp(product.orig_price)}</span>
             )}
             {discount > 0 && (
-              <span style={{ fontFamily: 'var(--fm)', fontSize: '9px', color: '#b85c38', letterSpacing: '.08em' }}>Save {fp(product.orig_price - product.price)}</span>
+              <span style={{ fontFamily: 'var(--fm)', fontSize: '9px', color: '#b85c38', letterSpacing: '.08em' }}>Save {fp((product.orig_price || 0) - (product.price || 0))}</span>
             )}
           </div>
 
           {/* Color selection */}
-          {product.colors?.length > 0 && (
+          {product.colors.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.15em', color: 'var(--warm)', marginBottom: 12 }}>
                 COLOR — <span style={{ color: '#111' }}>{selColor?.color_name || ''}</span>
@@ -159,13 +210,13 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
           )}
 
           {/* Size selection */}
-          {product.sizes?.length > 0 && (
+          {product.sizes.length > 0 && (
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.15em', color: 'var(--warm)', marginBottom: 12 }}>SIZE</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {product.sizes.map(s => {
-                  const sKey = selColor ? `${s}__${selColor.color_name}` : null;
-                  const sStock = sKey && product.stockMap ? (product.stockMap[sKey] ?? 99) : 99;
+                  const sKey = selColor?.color_name ? `${s}__${selColor.color_name}` : null;
+                  const sStock = sKey ? (product.stockMap[sKey] ?? 99) : 99;
                   const sOOS = sStock === 0;
                   return (
                     <button key={s}
@@ -204,9 +255,9 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
             <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.15em', color: 'var(--warm)' }}>QTY</div>
             <div style={{ display: 'flex', alignItems: 'center', border: 'var(--bd)', background: '#fff' }}>
-              <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'var(--fm)' }}>−</button>
+              <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'var(--fm)' }}>\u2212</button>
               <span style={{ width: 36, textAlign: 'center', fontFamily: 'var(--fm)', fontSize: '9px' }}>{qty}</span>
-              <button onClick={() => setQty(Math.min(stockQty, qty + 1))} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'var(--fm)' }}>+</button>
+              <button onClick={() => setQty(Math.min(stockQty || 99, qty + 1))} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'var(--fm)' }}>+</button>
             </div>
           </div>
 
@@ -219,7 +270,7 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
             <button
               onClick={() => togWish && togWish(product.id)}
               style={{ width: 48, height: 48, border: 'var(--bd)', background: '#fff', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {isWish(product.id) ? '♥' : '♡'}
+              {isWish && isWish(product.id) ? '\u2665' : '\u2661'}
             </button>
           </div>
 
@@ -231,13 +282,13 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
 
           {!isLoggedIn && (
             <div style={{ padding: '10px 14px', background: 'var(--off)', border: 'var(--bd)', fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.08em', color: 'var(--warm)', marginBottom: 16 }}>
-              💡 <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setPage('auth')}>Sign in</span> to add to bag and save to wishlist
+              \uD83D\uDCA1 <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setPage('auth')}>Sign in</span> to add to bag and save to wishlist
             </div>
           )}
 
           {/* Trust badges */}
           <div style={{ display: 'flex', gap: 20, padding: '16px 0', borderTop: 'var(--bd)', borderBottom: 'var(--bd)', marginBottom: 28 }}>
-            {['🔒 Secure Payment', '🔄 Easy Returns', '✅ 100% Genuine', '🚚 Fast Delivery'].map(b => (
+            {['\uD83D\uDD12 Secure Payment', '\uD83D\uDD04 Easy Returns', '\u2705 100% Genuine', '\uD83D\uDE9A Fast Delivery'].map(b => (
               <div key={b} style={{ fontFamily: 'var(--fm)', fontSize: '7px', letterSpacing: '.08em', color: 'var(--warm)', flex: 1, textAlign: 'center' }}>{b}</div>
             ))}
           </div>
@@ -260,9 +311,9 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
           )}
           {tab === 'shipping' && (
             <div style={{ fontFamily: 'var(--fm)', fontSize: '9px', letterSpacing: '.04em', color: 'var(--warm)', lineHeight: 2 }}>
-              <div>Standard: 3-7 business days · Free over ₹1,500</div>
-              <div>Express: 1-3 business days · ₹199</div>
-              <div>Same Day: Available in select metros · ₹299</div>
+              <div>Standard: 3-7 business days \u00B7 Free over \u20B91,500</div>
+              <div>Express: 1-3 business days \u00B7 \u20B9199</div>
+              <div>Same Day: Available in select metros \u00B7 \u20B9299</div>
               <div style={{ marginTop: 8 }}>Returns within 7 days of delivery.</div>
             </div>
           )}
@@ -275,8 +326,8 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
           <div style={{ fontFamily: 'var(--fm)', fontSize: '9px', letterSpacing: '.2em', marginBottom: 32, color: 'var(--warm)' }}>YOU MAY ALSO LIKE</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--bd)' }}>
             {related.slice(0, 4).map(p => (
-              <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
-                onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
+              <ProductCard key={p.id} product={p} onClick={() => openDetail && openDetail(p.id)}
+                onQuickAdd={quickAdd} isWish={isWish && isWish(p.id)} onToggleWish={togWish} />
             ))}
           </div>
         </div>

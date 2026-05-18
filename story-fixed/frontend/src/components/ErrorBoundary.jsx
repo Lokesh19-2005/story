@@ -28,7 +28,7 @@ export default class ErrorBoundary extends Component {
         <div style={{ fontSize: '8.5px', color: 'var(--warm)', marginBottom: 32, textAlign: 'center', maxWidth: 420, lineHeight: 1.8 }}>
           An unexpected error occurred. Please refresh the page. If the problem persists, contact support.
         </div>
-        {process.env.NODE_ENV === 'development' && this.state.error && (
+        {import.meta.env.DEV && this.state.error && (
           <pre style={{ fontSize: 10, background: '#fee2e2', padding: 16, borderRadius: 4, maxWidth: 600, overflow: 'auto', marginBottom: 24, color: '#991b1b' }}>
             {this.state.error.toString()}
           </pre>

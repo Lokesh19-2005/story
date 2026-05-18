@@ -4,7 +4,8 @@ import ProductCard from '../components/ProductCard.jsx';
 import Footer from '../components/Footer.jsx';
 
 export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWish }) {
-  const { products, loading } = useProducts({ limit: 4, sort: 'newest' });
+  const { products, loading, error } = useProducts({ limit: 4, sort: 'newest' });
+  const safeProducts = Array.isArray(products) ? products : [];
 
   return (
     <div>
@@ -105,9 +106,19 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         </div>
         {loading ? (
           <div style={{ textAlign:'center', padding:60, fontFamily:'var(--fm)', fontSize:'9px', letterSpacing:'.2em', color:'#888' }}>LOADING...</div>
+        ) : error ? (
+          <div style={{ textAlign:'center', padding:60, fontFamily:'var(--fm)', fontSize:'9px', letterSpacing:'.15em', color:'#888' }}>
+            <div style={{ marginBottom:14, color:'#111' }}>COULDN'T LOAD NEW ARRIVALS</div>
+            <div style={{ fontSize:'8px', letterSpacing:'.05em', color:'#888', marginBottom:20 }}>{error}</div>
+            <button className="btn btn-w" onClick={() => setPage('shop')} style={{ fontSize:'8.5px' }}>BROWSE SHOP →</button>
+          </div>
+        ) : safeProducts.length === 0 ? (
+          <div style={{ textAlign:'center', padding:60, fontFamily:'var(--fm)', fontSize:'9px', letterSpacing:'.2em', color:'#888' }}>
+            NO PRODUCTS YET
+          </div>
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:1, background:'#e0e0e0' }}>
-            {products.map(p => (
+            {safeProducts.map(p => (
               <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
                 onQuickAdd={() => quickAdd(p.id)} isWish={isWish(p.id)} onToggleWish={togWish} />
             ))}

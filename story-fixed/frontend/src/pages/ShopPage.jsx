@@ -43,7 +43,8 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   if (sort) params.sort = sort;
   if (search) params.search = search;
 
-  const { products, loading } = useProducts(params);
+  const { products, loading, error } = useProducts(params);
+  const safeProducts = Array.isArray(products) ? products : [];
 
   const doSearch = useCallback(() => setSearch(searchInput), [searchInput]);
   const clearAll = () => { setBrand(''); setSearch(''); setSearchInput(''); };
@@ -53,7 +54,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
       {/* Shop header */}
       <div style={{ borderBottom: 'var(--bd)', padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', background: '#fff' }}>
         <div style={{ fontFamily: 'var(--fm)', fontSize: '9px', letterSpacing: '.2em', color: '#888', fontWeight: 500 }}>
-          {loading ? 'LOADING...' : `${products.length} PRODUCT${products.length !== 1 ? 'S' : ''}`}
+          {loading ? 'LOADING...' : `${safeProducts.length} PRODUCT${safeProducts.length !== 1 ? 'S' : ''}`}
         </div>
 
         {/* Search */}
@@ -116,13 +117,17 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
       <div style={{ padding: '32px 40px', minHeight: '50vh', background: '#fff' }}>
         {loading ? (
           <LoadingScreen message="LOADING PRODUCTS..." />
-        ) : products.length === 0 ? (
+        ) : error ? (
+          <EmptyState icon="!" title="COULDN'T LOAD PRODUCTS"
+            subtitle={error || 'Please check your connection and try again.'}
+            action="RETRY" onAction={() => window.location.reload()} />
+        ) : safeProducts.length === 0 ? (
           <EmptyState icon="O" title="NO PRODUCTS FOUND"
             subtitle={search ? `No results for "${search}"` : 'Try a different brand or filter'}
             action="CLEAR FILTERS" onAction={clearAll} />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0' }}>
-            {products.map(p => (
+            {safeProducts.map(p => (
               <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
                 onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
             ))}
