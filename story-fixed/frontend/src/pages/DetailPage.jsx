@@ -1,9 +1,11 @@
 // src/pages/DetailPage.jsx — Product Detail with Stock Display
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { productsAPI } from '../services/api.js';
 import { fp, pct } from '../utils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProductCard from '../components/ProductCard.jsx';
+import SmartImage from '../components/SmartImage.jsx';
+import { getProductImages } from '../utils/productImages.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function DetailPage({ productId, addCart, openDrawer, setPage, openDetail, quickAdd, isWish, togWish, toast }) {
@@ -18,6 +20,13 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
   const [adding, setAdding]     = useState(false);
   const [msg, setMsg]           = useState('');
   const [tab, setTab]           = useState('details');
+  const [activeImg, setActiveImg] = useState(0);
+
+  // Resolved gallery images for the current product (always an array).
+  const galleryImages = useMemo(
+    () => (product ? getProductImages(product, 1000) : []),
+    [product]
+  );
 
   const loadProduct = useCallback(async () => {
     if (!productId) {
@@ -32,6 +41,7 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
     setSelSize('');
     setSelColor(null);
     setQty(1);
+    setActiveImg(0);
 
     try {
       // Fetch all products to find by id, then get detail by slug
@@ -144,24 +154,58 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
         <span style={{ color: '#111' }}>{product.name || ''}</span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }}>
-        {/* Left — Product Image */}
-        <div>
-          <div style={{ background: 'var(--off)', aspectRatio: '4/5', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', border: 'var(--bd)' }}>
-            <span style={{ fontSize: 140, opacity: .14 }}>{product.icon || '\u25C9'}</span>
+      <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80 }}>
+        {/* Left — Product Gallery */}
+        <div className="pdp-gallery">
+          {/* Thumbnail rail */}
+          {galleryImages.length > 1 && (
+            <div className="pdp-gallery-thumbs" role="tablist" aria-label="Product images">
+              {galleryImages.map((src, i) => (
+                <button
+                  key={src + i}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeImg === i}
+                  aria-label={`View image ${i + 1} of ${galleryImages.length}`}
+                  onClick={() => setActiveImg(i)}
+                  className={`pdp-thumb${activeImg === i ? ' is-active' : ''}`}
+                >
+                  <SmartImage
+                    src={src}
+                    alt=""
+                    aspectRatio="1/1"
+                    fallbackIcon={product.icon || '\u25C9'}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Main image */}
+          <div className="pdp-gallery-main">
+            <SmartImage
+              key={galleryImages[activeImg] || 'fallback'}
+              src={galleryImages[activeImg] || ''}
+              alt={`${product.brand || ''} ${product.name || ''}`.trim()}
+              aspectRatio="4/5"
+              fallbackIcon={product.icon || '\u25C9'}
+              priority
+            />
             {product.tag && (
-              <div style={{ position: 'absolute', top: 20, left: 20, background: '#111', color: '#fff', fontFamily: 'var(--fm)', fontSize: '7px', letterSpacing: '.2em', padding: '4px 12px' }}>
+              <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 2, background: '#111', color: '#fff', fontFamily: 'var(--fm)', fontSize: '7px', letterSpacing: '.2em', padding: '4px 12px' }}>
                 {product.tag}
               </div>
             )}
             {discount > 0 && (
-              <div style={{ position: 'absolute', top: 20, right: 20, background: '#b85c38', color: '#fff', fontFamily: 'var(--fm)', fontSize: '7px', letterSpacing: '.1em', padding: '4px 10px' }}>
+              <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 2, background: '#b85c38', color: '#fff', fontFamily: 'var(--fm)', fontSize: '7px', letterSpacing: '.1em', padding: '4px 10px' }}>
                 -{discount}% OFF
               </div>
             )}
             <button
+              type="button"
               onClick={() => togWish && togWish(product.id)}
-              style={{ position: 'absolute', bottom: 20, right: 20, background: '#fff', border: 'var(--bd)', width: 40, height: 40, cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              aria-label={isWish && isWish(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+              style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 2, background: '#fff', border: 'var(--bd)', width: 40, height: 40, cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {isWish && isWish(product.id) ? '\u2665' : '\u2661'}
             </button>
           </div>
