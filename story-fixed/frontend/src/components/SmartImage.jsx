@@ -16,6 +16,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+/**
+ * Trim whitespace and treat empty / falsy values as "no source" so we
+ * skip the network request entirely and go straight to the icon fallback.
+ * This is what kills lingering blank tiles when an admin record had a
+ * placeholder string ("", " ", "null") in image_url.
+ */
+function isUsableSrc(src) {
+  return typeof src === 'string' && src.trim().length > 0;
+}
+
 export default function SmartImage({
   src,
   hoverSrc = '',
@@ -28,8 +38,9 @@ export default function SmartImage({
   style,
   onLoad,
 }) {
-  const [loaded, setLoaded] = useState(false);
-  const [errored, setErrored] = useState(false);
+  const [loaded, setLoaded]       = useState(false);
+  const [errored, setErrored]     = useState(false);
+  const [hoverFailed, setHoverFailed] = useState(false);
   const imgRef = useRef(null);
 
   // Reset transient state when the source changes (e.g. PDP gallery switch).
@@ -37,6 +48,13 @@ export default function SmartImage({
     setLoaded(false);
     setErrored(false);
   }, [src]);
+
+  // Reset hover-image error state independently when the hover source
+  // changes — otherwise a previous product's hover failure would leak
+  // into the next product on a thumbnail / detail navigation.
+  useEffect(() => {
+    setHoverFailed(false);
+  }, [hoverSrc]);
 
   // If the browser already cached the image, onLoad may have fired before our
   // listener attached. Sync state from the underlying element after mount.
@@ -47,7 +65,13 @@ export default function SmartImage({
     }
   }, [src]);
 
-  const showImage = Boolean(src) && !errored;
+  const validSrc       = isUsableSrc(src);
+  const showImage      = validSrc && !errored;
+  // Only render the hover image when it's a usable URL, distinct from the
+  // primary, and hasn't failed to load. Skipping the redundant <img> when
+  // hoverSrc === src avoids a wasted CDN hit and a no-op hover swap.
+  const validHoverSrc  = isUsableSrc(hoverSrc) && hoverSrc !== src;
+  const showHoverImage = showImage && validHoverSrc && !hoverFailed;
 
   return (
     <div
@@ -62,7 +86,10 @@ export default function SmartImage({
             alt={alt}
             loading={priority ? 'eager' : 'lazy'}
             decoding="async"
-            fetchpriority={priority ? 'high' : 'auto'}
+            // React 18.3+ expects camelCase `fetchPriority`. Lowercase
+            // `fetchpriority` was being filtered out by React's DOM
+            // property allowlist and silently dropping the priority hint.
+            fetchPriority={priority ? 'high' : 'auto'}
             draggable={false}
             onLoad={(e) => { setLoaded(true); if (onLoad) onLoad(e); }}
             onError={() => setErrored(true)}
@@ -72,7 +99,7 @@ export default function SmartImage({
               objectPosition,
             }}
           />
-          {hoverSrc && (
+          {showHoverImage && (
             <img
               src={hoverSrc}
               alt=""
@@ -82,7 +109,7 @@ export default function SmartImage({
               aria-hidden="true"
               className="smart-img-el smart-img-hover"
               style={{ objectPosition }}
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              onError={() => setHoverFailed(true)}
             />
           )}
           {!loaded && <div className="smart-img-skel" aria-hidden="true" />}
