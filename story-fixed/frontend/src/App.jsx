@@ -1,10 +1,17 @@
 // src/App.jsx — STORY™ Full Stack App
+//
+// While the storefront runs in backend-less demo mode, three frontend
+// contracts are swapped for static-data drop-ins:
+//   - useProducts  -> useStaticProducts  (catalog from src/data/products.js)
+//   - useStore     -> useStaticStore     (cart + wishlist via localStorage)
+//   - AuthProvider -> StaticAuthProvider (always-on guest user)
+// Each of these aliases preserves the original hook/component contract,
+// so every page, drawer, and component keeps working unchanged. To flip
+// back to the live backend, restore the original imports below.
 import { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from './context/AuthContext.jsx';
-import { useStore } from './hooks/useStore.js';
-// useProducts (backend API) is left in place but the storefront now reads
-// from the centralized static catalog while temporary frontend rendering
-// is in effect. See src/data/products.js + src/hooks/useStaticProducts.js.
+import { useAuth } from './context/AuthContext.jsx';
+import { StaticAuthProvider as AuthProvider } from './context/StaticAuthProvider.jsx';
+import { useStaticStore as useStore } from './hooks/useStaticStore.js';
 import { useStaticProducts as useProducts } from './hooks/useStaticProducts.js';
 import { ToastProvider, useToast } from './components/Toast.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';

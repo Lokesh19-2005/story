@@ -2,7 +2,11 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
 
-const AuthContext = createContext(null);
+// `AuthContext` is exported so alternate providers (e.g.
+// StaticAuthProvider for backend-less demo mode) can publish into the
+// same context that `useAuth()` reads from. The default `AuthProvider`
+// below keeps its API-backed behaviour unchanged.
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser]       = useState(null);
