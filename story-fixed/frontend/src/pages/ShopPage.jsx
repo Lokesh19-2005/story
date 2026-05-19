@@ -7,15 +7,19 @@ import EmptyState from '../components/EmptyState.jsx';
 import Footer from '../components/Footer.jsx';
 import CategoryTabs from '../components/CategoryTabs.jsx';
 import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
+import SortDropdown from '../components/SortDropdown.jsx';
+import GridSwitcher from '../components/GridSwitcher.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';
 import { filterByBrands, countByBrands } from '../utils/brandList.js';
 import { filterBySizes, countBySizes } from '../utils/sizeList.js';
 import { filterByPrices, countByPrices } from '../utils/priceRanges.js';
 
+// Display labels are luxury-tuned; the `v` values match the backend
+// `?sort=` contract (newest | price_asc | price_desc) — do not change.
 const SORTS = [
-  { v: 'newest', l: 'NEWEST FIRST' },
-  { v: 'price_asc', l: 'PRICE: LOW \u2192 HIGH' },
+  { v: 'newest',     l: 'NEW IN' },
+  { v: 'price_asc',  l: 'PRICE: LOW \u2192 HIGH' },
   { v: 'price_desc', l: 'PRICE: HIGH \u2192 LOW' },
 ];
 
@@ -165,19 +169,10 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
         </div>
 
         {/* Sort */}
-        <select className="fs2" value={sort} onChange={e => setSort(e.target.value)} style={{ width: 'auto', minWidth: 190 }}>
-          {SORTS.map(s => <option key={s.v} value={s.v}>{s.l}</option>)}
-        </select>
+        <SortDropdown value={sort} options={SORTS} onChange={setSort} />
 
         {/* Grid cols — hidden on mobile */}
-        <div style={{ display: 'flex', gap: 4 }} className="col-switcher">
-          {[2, 3, 4].map(n => (
-            <button key={n} onClick={() => setCols(n)}
-              style={{ width: 34, height: 34, border: cols === n ? '2px solid #111' : 'var(--bd)', background: cols === n ? '#111' : '#fff', color: cols === n ? '#fff' : '#111', fontFamily: 'var(--fm)', fontSize: '9px', cursor: 'pointer', transition: 'all .15s', fontWeight: 600 }}>
-              {n}{'\u00D7'}
-            </button>
-          ))}
-        </div>
+        <GridSwitcher cols={cols} onChange={setCols} className="col-switcher" />
 
         {hasAnyFilter && (
           <button onClick={clearAll}
