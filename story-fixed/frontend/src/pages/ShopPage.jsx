@@ -1,6 +1,10 @@
 // ShopPage — sidebar-driven filtering, search, sort
+// Product data is sourced from the centralized static catalog
+// (src/data/products.js) via the useStaticProducts hook. The category /
+// sort / search params still flow through unchanged so the existing tab
+// rail, sidebar filters, sort dropdown and search bar all keep working.
 import { useState, useCallback, useMemo } from 'react';
-import { useProducts } from '../hooks/useProducts.js';
+import { useStaticProducts as useProducts } from '../hooks/useStaticProducts.js';
 import ProductCard from '../components/ProductCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import EmptyState from '../components/EmptyState.jsx';

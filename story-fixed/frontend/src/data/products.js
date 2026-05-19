@@ -325,8 +325,8 @@ export const PRODUCTS = Object.freeze([
       lux('1620799140408-edc6dcb6d633'),
     ],
     description:
-      'Inner-Mongolian 12-gauge cashmere crewneck. Tonal jersey-bound neckline, ' +
-      'minimal seams, fully fashioned to drape without distortion after wear.',
+      'Inner-Mongolian 12-gauge cashmere crewneck knit. Tonal jersey-bound ' +
+      'neckline, minimal seams, fully fashioned to drape without distortion after wear.',
     sizes: SZ_APPAREL,
     stock: 22,
     badge: BADGES.EXCLUSIVE,
@@ -369,8 +369,8 @@ export const PRODUCTS = Object.freeze([
       lux('1583743814966-8936f5b7be1a'),
     ],
     description:
-      'Fine-gauge ribbed polo in mercerised cotton with a clean two-button placket. ' +
-      'Sits under tailoring without bulk.',
+      'Fine-gauge ribbed knit polo in mercerised cotton with a clean two-button ' +
+      'placket. Sits under tailoring without bulk.',
     sizes: SZ_APPAREL,
     stock: 74,
     badge: BADGES.NEW,
