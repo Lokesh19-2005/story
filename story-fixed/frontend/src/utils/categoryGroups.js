@@ -1,77 +1,52 @@
 // src/utils/categoryGroups.js
-// Coarse "meta-group" definitions for the left sidebar checkbox filter.
+// CATEGORY section of the Shop sidebar.
 //
-// These map customer-facing labels (Shoes / Clothing / Accessories / Bags) to
-// the seeded backend categories. The backend has 5 fine categories
-// (shoes, tops, bottoms, outerwear, accessories) — the sidebar surfaces 4
-// premium meta-groups by composing them. "Bags" is carved out of accessories
-// via a name-pattern, since the backend does not have a dedicated category.
+// Groups are now exactly the 7 storefront verticals defined in
+// src/data/products.js (OUTWEAR, HEADWEAR, KNIT, JEANS, PANTS, SHOES,
+// ACCESSORIES) - one group per category, matched by `category_id`.
 //
-// Filtering is applied entirely on the client so multi-select works without
-// touching the products API.
+// The previous 4-meta-group model (Shoes / Clothing / Accessories / Bags
+// with regex carve-outs) collapsed several of the new categories into
+// one row and produced inflated counts. The 7-group model gives every
+// category its own row and a count that matches the visible grid.
+//
+// All multi-select / count semantics are preserved: callers continue to
+// use `filterByGroups` and `countByGroup` exactly as before.
 
-export const CATEGORY_GROUPS = [
-  {
-    id: 'shoes',
-    label: 'SHOES',
-    categories: ['shoes'],
-  },
-  {
-    id: 'clothing',
-    label: 'CLOTHING',
-    categories: ['tops', 'bottoms', 'outerwear'],
-  },
-  {
-    id: 'accessories',
-    label: 'ACCESSORIES',
-    categories: ['accessories'],
-    // Exclude bags so they don't appear in both Accessories and Bags.
-    exclude: /\b(bag|tote|backpack|wallet|purse|clutch)\b/i,
-  },
-  {
-    id: 'bags',
-    label: 'BAGS',
-    categories: ['accessories'],
-    match: /\b(bag|tote|backpack|wallet|purse|clutch)\b/i,
-  },
-];
+import { CATEGORIES } from '../data/products.js';
 
-const GROUP_BY_ID = Object.fromEntries(CATEGORY_GROUPS.map(g => [g.id, g]));
+/** One sidebar entry per storefront vertical, in catalog order. */
+export const CATEGORY_GROUPS = Object.freeze(
+  CATEGORIES.map(c => ({ id: c.id, label: c.label }))
+);
+
+const GROUP_IDS = new Set(CATEGORY_GROUPS.map(g => g.id));
 
 /** True when a single product belongs to the given group id. */
 export function matchesGroup(product, groupId) {
-  const g = GROUP_BY_ID[groupId];
-  if (!g || !product) return false;
-
-  const cat = (product.category_slug || '').toLowerCase();
-  if (!g.categories.includes(cat)) return false;
-
-  const hay = `${product.name || ''} ${product.description || ''}`;
-  if (g.match   && !g.match.test(hay))   return false;
-  if (g.exclude &&  g.exclude.test(hay)) return false;
-  return true;
+  if (!product || !groupId || !GROUP_IDS.has(groupId)) return false;
+  return product.category_id === groupId;
 }
 
 /**
- * Filter products by selected meta-group ids (multi-select; OR within the
- * group set). When no groups are selected, returns the input unchanged.
+ * Filter products by selected group ids (multi-select; OR within the
+ * selection). Returns the input unchanged when no groups are selected.
  */
 export function filterByGroups(products, selectedIds) {
   const list = Array.isArray(products) ? products : [];
   if (!selectedIds || selectedIds.size === 0) return list;
-  return list.filter(p =>
-    Array.from(selectedIds).some(id => matchesGroup(p, id))
-  );
+  const set = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
+  return list.filter(p => p && set.has(p.category_id));
 }
 
-/** Compute per-group counts for the badge in the sidebar UI. */
+/** Per-group counts for the badge in the sidebar UI. */
 export function countByGroup(products) {
   const list = Array.isArray(products) ? products : [];
   const out = {};
-  for (const g of CATEGORY_GROUPS) {
-    let n = 0;
-    for (const p of list) if (matchesGroup(p, g.id)) n++;
-    out[g.id] = n;
+  for (const g of CATEGORY_GROUPS) out[g.id] = 0;
+  for (const p of list) {
+    const id = p?.category_id;
+    if (id && id in out) out[id]++;
   }
   return out;
 }

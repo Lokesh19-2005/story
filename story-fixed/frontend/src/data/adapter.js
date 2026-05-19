@@ -127,7 +127,15 @@ export function adaptProduct(p) {
     price:      Number(p.price)         || 0,
     orig_price: Number(p.originalPrice) || Number(p.price) || 0,
 
-    // Category fields used by tabs / groups / breadcrumbs / fallback images
+    // Category fields.
+    //   category_id    : NEW 7-cat id (outwear/headwear/knit/jeans/pants/
+    //                    shoes/accessories) - the canonical key for filter
+    //                    utilities (categoryTabs, categoryGroups).
+    //   category_slug  : legacy backend slug (shoes/tops/bottoms/outerwear/
+    //                    accessories) - kept for productImages fallbacks
+    //                    and any consumer that still expects the 5-cat shape.
+    //   category_label : human-readable label for breadcrumbs + sidebar.
+    category_id:    p.category,
     category_slug:  CATEGORY_TO_LEGACY_SLUG[p.category] || 'accessories',
     category_label: CATEGORY_TO_LABEL[p.category]       || 'CATEGORY',
 

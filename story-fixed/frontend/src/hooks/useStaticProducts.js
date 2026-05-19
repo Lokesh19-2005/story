@@ -51,7 +51,12 @@ export function useStaticProducts(params = {}) {
     let list = ADAPTED.slice();
 
     if (category) {
-      list = list.filter(p => p.category_slug === category);
+      // `category` is the new 7-cat id (outwear/headwear/knit/jeans/pants/
+      // shoes/accessories) sourced from CategoryTabs / sidebar groups.
+      // Matching against `category_id` (not the legacy 5-cat
+      // `category_slug`) ensures the ACCESSORIES tab no longer leaks
+      // headwear and HEADWEAR no longer needs name-regex narrowing.
+      list = list.filter(p => p.category_id === category);
     }
     if (search) {
       list = list.filter(p => searchMatch(p, search));
