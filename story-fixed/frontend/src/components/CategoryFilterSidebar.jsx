@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { CATEGORY_GROUPS } from '../utils/categoryGroups.js';
 import { BRAND_LIST } from '../utils/brandList.js';
 import { SIZE_LIST } from '../utils/sizeList.js';
+import { PRICE_RANGES } from '../utils/priceRanges.js';
 
 function ChevronIcon() {
   return (
@@ -145,6 +146,12 @@ export default function CategoryFilterSidebar({
   sizeCounts    = {},
   onToggleSize,
   onClearSizes,
+  // PRICE section
+  prices         = PRICE_RANGES,
+  selectedPrices = new Set(),
+  priceCounts    = {},
+  onTogglePrice,
+  onClearPrices,
 }) {
   return (
     <div className="cat-filter">
@@ -175,6 +182,16 @@ export default function CategoryFilterSidebar({
           counts={sizeCounts}
           onToggle={onToggleSize}
           onClear={onClearSizes}
+        />
+      )}
+      {prices.length > 0 && (
+        <FilterSection
+          title="PRICE"
+          items={prices}
+          selected={selectedPrices}
+          counts={priceCounts}
+          onToggle={onTogglePrice}
+          onClear={onClearPrices}
         />
       )}
     </div>
