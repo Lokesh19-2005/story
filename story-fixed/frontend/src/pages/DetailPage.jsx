@@ -301,7 +301,7 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
             <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.15em', color: 'var(--warm)' }}>QTY</div>
             <div style={{ display: 'flex', alignItems: 'center', border: 'var(--bd)', background: '#fff' }}>
-              <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'var(--fm)' }}>\u2212</button>
+              <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'var(--fm)' }}>{'\u2212'}</button>
               <span style={{ width: 36, textAlign: 'center', fontFamily: 'var(--fm)', fontSize: '9px' }}>{qty}</span>
               <button onClick={() => setQty(Math.min(stockQty || 99, qty + 1))} style={{ width: 36, height: 36, border: 'none', background: 'none', cursor: 'pointer', fontSize: '14px', fontFamily: 'var(--fm)' }}>+</button>
             </div>
@@ -328,7 +328,7 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
 
           {!isLoggedIn && (
             <div style={{ padding: '10px 14px', background: 'var(--off)', border: 'var(--bd)', fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.08em', color: 'var(--warm)', marginBottom: 16 }}>
-              \uD83D\uDCA1 <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setPage('auth')}>Sign in</span> to add to bag and save to wishlist
+              {'\uD83D\uDCA1 '}<span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setPage('auth')}>Sign in</span> to add to bag and save to wishlist
             </div>
           )}
 
@@ -357,9 +357,9 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
           )}
           {tab === 'shipping' && (
             <div style={{ fontFamily: 'var(--fm)', fontSize: '9px', letterSpacing: '.04em', color: 'var(--warm)', lineHeight: 2 }}>
-              <div>Standard: 3-7 business days \u00B7 Free over \u20B91,500</div>
-              <div>Express: 1-3 business days \u00B7 \u20B9199</div>
-              <div>Same Day: Available in select metros \u00B7 \u20B9299</div>
+              <div>{'Standard: 3-7 business days \u00B7 Free over \u20B91,500'}</div>
+              <div>{'Express: 1-3 business days \u00B7 \u20B9199'}</div>
+              <div>{'Same Day: Available in select metros \u00B7 \u20B9299'}</div>
               <div style={{ marginTop: 8 }}>Returns within 7 days of delivery.</div>
             </div>
           )}
