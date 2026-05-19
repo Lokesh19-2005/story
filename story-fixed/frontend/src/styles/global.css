@@ -362,6 +362,67 @@ a { color: inherit; text-decoration: none; }
 }
 .cat-clear:hover { color: #111; }
 
+/* ── Size grid (variant='grid') — compact luxury chip toggles ── */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.cat-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 6px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--fm);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: #555;
+  text-transform: uppercase;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.cat-chip:hover {
+  border-color: #111;
+  color: #111;
+}
+.cat-chip.is-on {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+.cat-chip.is-disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+.cat-chip.is-disabled:hover {
+  border-color: #e0e0e0;
+  color: #555;
+}
+.cat-chip-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+.cat-chip-input:focus-visible + .cat-chip-label,
+.cat-chip:has(.cat-chip-input:focus-visible) {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+.cat-chip-label {
+  pointer-events: none;
+}
+
 /* ── Product grid ── */
 .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #e0e0e0; }
 .products-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }

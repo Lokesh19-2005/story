@@ -10,6 +10,8 @@ import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';
 import { filterByBrands, countByBrands } from '../utils/brandList.js';
+import { filterBySizes, countBySizes } from '../utils/sizeList.js';
+import { filterByPrices, countByPrices } from '../utils/priceRanges.js';
 
 const SORTS = [
   { v: 'newest', l: 'NEWEST FIRST' },
@@ -21,6 +23,8 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   const [tab, setTab]               = useState('all');
   const [groupSel, setGroupSel]     = useState(() => new Set());
   const [brandSel, setBrandSel]     = useState(() => new Set());
+  const [sizeSel, setSizeSel]       = useState(() => new Set());
+  const [priceSel, setPriceSel]     = useState(() => new Set());
   const [sort, setSort]             = useState('newest');
   const [search, setSearch]         = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -35,7 +39,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   const { products, loading, error } = useProducts(params);
 
   // Pipeline: server (category/sort/search) -> tab refine -> sidebar groups
-  // -> sidebar brands. Each stage is a pure transform on an array.
+  // -> sidebar brands -> sidebar sizes. Each stage is a pure transform.
   const tabFiltered = useMemo(
     () => refineByTab(Array.isArray(products) ? products : [], tab),
     [products, tab]
@@ -44,17 +48,39 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   // Counts use cross-axis filtering so each section's numbers reflect what
   // would happen if the user ticked that option, given the OTHER axes.
   const groupCounts = useMemo(
-    () => countByGroup(filterByBrands(tabFiltered, brandSel)),
-    [tabFiltered, brandSel]
+    () => countByGroup(
+      filterByPrices(filterBySizes(filterByBrands(tabFiltered, brandSel), sizeSel), priceSel)
+    ),
+    [tabFiltered, brandSel, sizeSel, priceSel]
   );
   const brandCounts = useMemo(
-    () => countByBrands(filterByGroups(tabFiltered, groupSel)),
-    [tabFiltered, groupSel]
+    () => countByBrands(
+      filterByPrices(filterBySizes(filterByGroups(tabFiltered, groupSel), sizeSel), priceSel)
+    ),
+    [tabFiltered, groupSel, sizeSel, priceSel]
+  );
+  const sizeCounts = useMemo(
+    () => countBySizes(
+      filterByPrices(filterByBrands(filterByGroups(tabFiltered, groupSel), brandSel), priceSel)
+    ),
+    [tabFiltered, groupSel, brandSel, priceSel]
+  );
+  const priceCounts = useMemo(
+    () => countByPrices(
+      filterBySizes(filterByBrands(filterByGroups(tabFiltered, groupSel), brandSel), sizeSel)
+    ),
+    [tabFiltered, groupSel, brandSel, sizeSel]
   );
 
   const safeProducts = useMemo(
-    () => filterByBrands(filterByGroups(tabFiltered, groupSel), brandSel),
-    [tabFiltered, groupSel, brandSel]
+    () => filterByPrices(
+      filterBySizes(
+        filterByBrands(filterByGroups(tabFiltered, groupSel), brandSel),
+        sizeSel
+      ),
+      priceSel
+    ),
+    [tabFiltered, groupSel, brandSel, sizeSel, priceSel]
   );
 
   // ── Handlers
@@ -78,11 +104,37 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   }, []);
   const clearBrands = useCallback(() => setBrandSel(new Set()), []);
 
-  const hasAnyFilter = tab !== 'all' || groupSel.size > 0 || brandSel.size > 0 || !!search;
+  const toggleSize = useCallback((id) => {
+    setSizeSel(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearSizes = useCallback(() => setSizeSel(new Set()), []);
+
+  const togglePrice = useCallback((id) => {
+    setPriceSel(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearPrices = useCallback(() => setPriceSel(new Set()), []);
+
+  const hasAnyFilter =
+    tab !== 'all' ||
+    groupSel.size > 0 ||
+    brandSel.size > 0 ||
+    sizeSel.size > 0 ||
+    priceSel.size > 0 ||
+    !!search;
   const clearAll = () => {
     setTab('all');
     setGroupSel(new Set());
     setBrandSel(new Set());
+    setSizeSel(new Set());
+    setPriceSel(new Set());
     setSearch('');
     setSearchInput('');
   };
@@ -150,6 +202,14 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
             brandCounts={brandCounts}
             onToggleBrand={toggleBrand}
             onClearBrands={clearBrands}
+            selectedSizes={sizeSel}
+            sizeCounts={sizeCounts}
+            onToggleSize={toggleSize}
+            onClearSizes={clearSizes}
+            selectedPrices={priceSel}
+            priceCounts={priceCounts}
+            onTogglePrice={togglePrice}
+            onClearPrices={clearPrices}
           />
         </aside>
 
