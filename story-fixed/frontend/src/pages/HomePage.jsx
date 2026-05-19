@@ -1,5 +1,9 @@
 // HomePage — editorial black & white hero matching screenshots
-import { useProducts } from '../hooks/useProducts.js';
+// Product data is sourced from the centralized static catalog
+// (src/data/products.js) via the useStaticProducts hook. The legacy
+// useProducts (backend API) hook remains available but is intentionally
+// not used here while the storefront runs on temporary static data.
+import { useStaticProducts as useProducts } from '../hooks/useStaticProducts.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Footer from '../components/Footer.jsx';
 
