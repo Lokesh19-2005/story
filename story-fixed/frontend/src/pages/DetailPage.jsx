@@ -172,7 +172,10 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
                   <SmartImage
                     src={src}
                     alt=""
-                    aspectRatio="1/1"
+                    /* Match the source 3:4 luxury crop. 1/1 was forcing
+                       object-fit: cover to slice 12.5% off the top + bottom
+                       of every thumbnail (heads / feet getting cropped). */
+                    aspectRatio="3/4"
                     fallbackIcon={product.icon || '\u25C9'}
                   />
                 </button>
