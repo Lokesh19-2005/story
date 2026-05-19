@@ -1,11 +1,13 @@
 // src/components/CategoryFilterSidebar.jsx
 // Luxury monochrome left-sidebar with multi-section checkbox filters.
-// Hosts a CATEGORY section and a BRAND section, both built from the same
-// FilterSection primitive (no duplicated checkbox markup).
+// Hosts CATEGORY, BRAND, and SIZE sections — all built from the same
+// FilterSection primitive (one collapse/checkbox implementation, two
+// presentation variants: 'list' for text rows, 'grid' for compact chips).
 
 import { useState } from 'react';
 import { CATEGORY_GROUPS } from '../utils/categoryGroups.js';
 import { BRAND_LIST } from '../utils/brandList.js';
+import { SIZE_LIST } from '../utils/sizeList.js';
 
 function ChevronIcon() {
   return (
@@ -24,8 +26,11 @@ function TickIcon() {
 }
 
 /**
- * Reusable collapsible filter section with multi-select checkbox rows.
- * Identical UX/markup is reused for CATEGORY and BRAND.
+ * Reusable collapsible filter section.
+ *   variant='list' : checkbox + label rows (CATEGORY, BRAND).
+ *   variant='grid' : compact 3-col toggle chips (SIZE).
+ * Items with count===0 in grid mode are visually disabled (greyed +
+ * line-through) — standard luxury size-picker UX.
  */
 function FilterSection({
   title,
@@ -35,6 +40,7 @@ function FilterSection({
   onToggle,
   onClear,
   defaultOpen = true,
+  variant = 'list',
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const bodyId = `flt-${title.toLowerCase().replace(/\s+/g, '-')}`;
@@ -60,29 +66,55 @@ function FilterSection({
         role="group"
         aria-label={`${title} filters`}
       >
-        <ul className="cat-list">
-          {items.map(item => {
-            const isOn  = selected.has(item.id);
-            const count = counts[item.id];
-            return (
-              <li key={item.id}>
-                <label className={`cat-row${isOn ? ' is-on' : ''}`}>
+        {variant === 'grid' ? (
+          <div className="cat-grid">
+            {items.map(item => {
+              const isOn       = selected.has(item.id);
+              const count      = counts[item.id];
+              const isDisabled = Number.isFinite(count) && count === 0 && !isOn;
+              return (
+                <label
+                  key={item.id}
+                  className={`cat-chip${isOn ? ' is-on' : ''}${isDisabled ? ' is-disabled' : ''}`}
+                  style={item.span ? { gridColumn: `span ${item.span}` } : undefined}
+                >
                   <input
                     type="checkbox"
-                    className="cat-input"
+                    className="cat-chip-input"
                     checked={isOn}
-                    onChange={() => onToggle && onToggle(item.id)}
+                    disabled={isDisabled}
+                    onChange={() => { if (!isDisabled && onToggle) onToggle(item.id); }}
                   />
-                  <span className={`cat-box${isOn ? ' is-on' : ''}`} aria-hidden="true">
-                    <TickIcon />
-                  </span>
-                  <span className="cat-label">{item.label}</span>
-                  {Number.isFinite(count) && <span className="cat-count">{count}</span>}
+                  <span className="cat-chip-label">{item.label}</span>
                 </label>
-              </li>
-            );
-          })}
-        </ul>
+              );
+            })}
+          </div>
+        ) : (
+          <ul className="cat-list">
+            {items.map(item => {
+              const isOn  = selected.has(item.id);
+              const count = counts[item.id];
+              return (
+                <li key={item.id}>
+                  <label className={`cat-row${isOn ? ' is-on' : ''}`}>
+                    <input
+                      type="checkbox"
+                      className="cat-input"
+                      checked={isOn}
+                      onChange={() => onToggle && onToggle(item.id)}
+                    />
+                    <span className={`cat-box${isOn ? ' is-on' : ''}`} aria-hidden="true">
+                      <TickIcon />
+                    </span>
+                    <span className="cat-label">{item.label}</span>
+                    {Number.isFinite(count) && <span className="cat-count">{count}</span>}
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
         {selected.size > 0 && (
           <button type="button" className="cat-clear" onClick={onClear}>
@@ -107,6 +139,12 @@ export default function CategoryFilterSidebar({
   brandCounts    = {},
   onToggleBrand,
   onClearBrands,
+  // SIZE section
+  sizes         = SIZE_LIST,
+  selectedSizes = new Set(),
+  sizeCounts    = {},
+  onToggleSize,
+  onClearSizes,
 }) {
   return (
     <div className="cat-filter">
@@ -126,6 +164,17 @@ export default function CategoryFilterSidebar({
           counts={brandCounts}
           onToggle={onToggleBrand}
           onClear={onClearBrands}
+        />
+      )}
+      {sizes.length > 0 && (
+        <FilterSection
+          title="SIZE"
+          items={sizes}
+          variant="grid"
+          selected={selectedSizes}
+          counts={sizeCounts}
+          onToggle={onToggleSize}
+          onClear={onClearSizes}
         />
       )}
     </div>
