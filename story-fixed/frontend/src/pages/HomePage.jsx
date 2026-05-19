@@ -487,7 +487,10 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           color: #fff;
           border: 1.5px solid #111;
           cursor: pointer;
-          transition: background .25s ease, color .25s ease, transform .25s ease;
+          transition: background .25s ease,
+                      color .25s ease,
+                      transform .25s ease,
+                      letter-spacing .35s ease;
           display: inline-flex;
           align-items: center;
           gap: 10px;
@@ -496,6 +499,7 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           background: transparent;
           color: #111;
           transform: translateY(-1px);
+          letter-spacing: .3em;
         }
         .hp-cta-primary.hp-cta-on-dark {
           background: transparent;
@@ -855,7 +859,20 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           margin: 0 auto;
           max-width: 920px;
           font-weight: 300;
+          position: relative;
         }
+        .hp-manifesto p::before,
+        .hp-manifesto p::after {
+          content: '';
+          display: block;
+          width: 40px;
+          height: 1px;
+          background: #111;
+          opacity: .35;
+          margin: 0 auto;
+        }
+        .hp-manifesto p::before { margin-bottom: 28px; }
+        .hp-manifesto p::after  { margin-top: 28px; }
 
         /* ─── 3 & 7. PRODUCT GRID (4-up) ─── */
         .hp-grid-4 {
@@ -1099,8 +1116,33 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
 
         /* ─── Responsive ─── */
+        @media (max-width: 1280px) {
+          .hp-section { padding: 104px 40px; }
+          .hp-hero-left { padding: clamp(72px, 8vw, 112px) clamp(40px, 6vw, 88px); }
+        }
+
         @media (max-width: 1100px) {
           .hp-atlas { grid-template-columns: repeat(4, 1fr); }
+          .hp-grid-4 { gap: 32px 20px; }
+        }
+
+        /* Tablet — keep the split hero but rebalance type and hierarchy */
+        @media (max-width: 1024px) and (min-width: 901px) {
+          .hp-hero { min-height: clamp(620px, 80vh, 760px); }
+          .hp-hero-left { padding: 72px 56px; }
+          .hp-hero-title { font-size: clamp(56px, 9vw, 96px); margin-bottom: 28px; }
+          .hp-hero-divider { margin: 4px 0 28px; }
+          .hp-hero-lede { margin-bottom: 32px; }
+          .hp-feature-card {
+            right: 28px;
+            bottom: 132px;
+            min-width: 200px;
+            padding: 16px 20px;
+          }
+          .hp-frame { width: clamp(170px, 30%, 240px); }
+          .hp-frame-1 { transform: translate(-72px, -52px) rotate(-7deg); }
+          .hp-frame-3 { transform: translate(72px, 52px) rotate(6deg); }
+          .hp-stats { gap: 36px; }
         }
 
         @media (max-width: 900px) {
@@ -1155,12 +1197,35 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
 
         @media (max-width: 640px) {
+          .hp-section { padding: 56px 18px; }
+          .hp-section-head {
+            margin-bottom: 28px;
+            padding-bottom: 18px;
+          }
+          .hp-section-head-center { margin-bottom: 32px; padding-bottom: 0; }
           .hp-atlas { grid-template-columns: repeat(2, 1fr); }
-          .hp-section-title { font-size: clamp(34px, 9vw, 44px); }
+          .hp-section-title { font-size: clamp(32px, 9vw, 42px); }
           .hp-banner-eyebrow { font-size: 7.5px; }
-          .hp-quote { padding: 80px 24px; }
+          .hp-banner-overlay { padding: 28px 22px; }
+          .hp-banner-title { font-size: clamp(38px, 9vw, 52px); margin-bottom: 16px; }
+          .hp-quote { padding: 72px 20px; }
+          .hp-quote-text { margin-bottom: 36px; line-height: 1.1; }
           .hp-feature-card { display: none; }
-          .hp-frame { width: clamp(130px, 38vw, 180px); }
+          .hp-frame { width: clamp(120px, 38vw, 170px); }
+          .hp-frame-1 { transform: translate(-44px, -28px) rotate(-6deg); }
+          .hp-frame-3 { transform: translate(44px, 28px) rotate(5deg); }
+          .hp-hero-right { min-height: 360px; }
+          .hp-hero-left { padding: 60px 20px 48px; }
+          .hp-hero-eyebrow { font-size: 8.5px; letter-spacing: .35em; gap: 12px; }
+          .hp-hero-eyebrow-rule { width: 32px; }
+          .hp-hero-title { font-size: clamp(48px, 14vw, 76px); }
+          .hp-hero-lede { font-size: 11.5px; }
+          .hp-stats { gap: 24px; }
+          .hp-stat { min-width: 0; padding-top: 10px; }
+          .hp-stat-num { font-size: clamp(24px, 7vw, 32px); }
+          .hp-manifesto { padding: 52px 20px; }
+          .hp-manifesto p::before, .hp-manifesto p::after { width: 28px; margin-block: 18px; }
+          .hp-service ul { gap: 12px 24px; flex-direction: column; align-items: flex-start; padding: 0 8px; }
         }
       `}</style>
     </div>

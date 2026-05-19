@@ -94,24 +94,17 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
       </div>
 
       <div className="pc-body">
-        <div style={{ fontFamily:'var(--fm)', fontSize:'8px', letterSpacing:'.15em', color:'#888', marginBottom:4, fontWeight:600 }}>
-          {product?.brand || ''}
-        </div>
-        <div style={{ fontFamily:'var(--fm)', fontSize:'10px', letterSpacing:'.03em', marginBottom:10, fontWeight:500 }}>
-          {product?.name || ''}
-        </div>
-        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-          <span style={{ fontFamily:'var(--fm)', fontSize:'12px', letterSpacing:'.02em', fontWeight:600 }}>
-            {fp(product?.price)}
-          </span>
+        <div className="pc-brand">{product?.brand || ''}</div>
+        <div className="pc-name">{product?.name || ''}</div>
+        <div className="pc-prices">
+          <span className="pc-price-now">{fp(product?.price)}</span>
           {isSale && (
-            <span style={{ fontFamily:'var(--fm)', fontSize:'8px', color:'#999', textDecoration:'line-through' }}>
-              {fp(product?.orig_price)}
-            </span>
+            <span className="pc-price-was">{fp(product?.orig_price)}</span>
           )}
         </div>
         <button
-          className="btn btn-k pc-quick"
+          className="pc-quick"
+          type="button"
           onClick={e => { e.stopPropagation(); if (onQuickAdd) onQuickAdd(product?.id); }}
         >
           QUICK ADD

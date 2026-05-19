@@ -10,9 +10,9 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
     <>
       <nav className="nav">
         {/* Left links */}
-        <div className="nav-left nav-links-desktop" style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
+        <div className="nav-left nav-links-desktop">
           <span className={`nav-link${page==='about'?' active':''}`} onClick={() => go('about')}>ABOUT</span>
-          <span className="nav-link" style={{ color: '#ccc', cursor: 'default' }}>PRESS</span>
+          <span className="nav-link nav-link-disabled">PRESS</span>
           <span className={`nav-link${page==='about'?' active':''}`} onClick={() => go('about')}>OUR STORY</span>
         </div>
 
@@ -29,31 +29,31 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
         </button>
 
         {/* Logo center */}
-        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => go('home')}>
+        <div className="nav-logo-wrap" onClick={() => go('home')}>
           <div className="nav-logo">STORY™</div>
           <div className="nav-sub">WRITE YOUR OWN STYLE</div>
         </div>
 
         {/* Right */}
         <div className="nav-right">
-          <span className={`nav-link nav-links-desktop${page==='shop'?' active':''}`} style={{ display:'inline' }} onClick={() => go('shop')}>SHOP</span>
-          <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>LOOKBOOK</span>
-          <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>CONTACT</span>
+          <span className={`nav-link nav-links-desktop${page==='shop'?' active':''}`} onClick={() => go('shop')}>SHOP</span>
+          <span className="nav-link nav-link-disabled nav-links-desktop">LOOKBOOK</span>
+          <span className="nav-link nav-link-disabled nav-links-desktop">CONTACT</span>
           {isLoggedIn ? (
             <>
-              <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('orders')}>ORDERS</button>
-              <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('profile')}>
+              <button className="nav-icon nav-links-desktop" onClick={() => go('orders')}>ORDERS</button>
+              <button className="nav-icon nav-links-desktop" onClick={() => go('profile')}>
                 {user?.name?.split(' ')[0]?.toUpperCase() || 'ACCOUNT'}
               </button>
               {user?.role === 'admin' && (
-                <button className="nav-icon" onClick={() => go('admin')} style={{ color: '#111', fontWeight: 700 }}>ADMIN</button>
+                <button className="nav-icon nav-icon-strong" onClick={() => go('admin')}>ADMIN</button>
               )}
             </>
           ) : (
-            <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('auth')}>SIGN IN</button>
+            <button className="nav-icon nav-links-desktop" onClick={() => go('auth')}>SIGN IN</button>
           )}
-          <button className="nav-icon" onClick={openDrawer} style={{ position: 'relative' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <button className="nav-icon nav-icon-cart" onClick={openDrawer} aria-label="Open cart">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/>
             </svg>
             {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
