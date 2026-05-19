@@ -6,7 +6,9 @@ import LoadingScreen from '../components/LoadingScreen.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Footer from '../components/Footer.jsx';
 import CategoryTabs from '../components/CategoryTabs.jsx';
+import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
+import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';
 
 const BRANDS = [
   { slug: '', label: 'ALL' },
@@ -39,7 +41,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [cols, setCols]     = useState(3);
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [groupSel, setGroupSel] = useState(() => new Set());
 
   const params = {};
   const catSlug = tabToCategorySlug(tab);
@@ -49,19 +51,38 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   if (search)  params.search   = search;
 
   const { products, loading, error } = useProducts(params);
-  // Server filters by category; tabs that need finer granularity (jeans,
-  // pants, knit, headwear) refine the slice on the client. ALL = passthrough.
-  const safeProducts = useMemo(
+
+  // Pipeline: server (category/brand/sort/search) -> tab refinement ->
+  // sidebar group filter. Each stage is a pure transform of an array.
+  const tabFiltered = useMemo(
     () => refineByTab(Array.isArray(products) ? products : [], tab),
     [products, tab]
   );
+  const safeProducts = useMemo(
+    () => filterByGroups(tabFiltered, groupSel),
+    [tabFiltered, groupSel]
+  );
+  // Counts for the sidebar — show how many of the currently visible (pre-group)
+  // products fall into each meta-group, so the user sees what each tick adds.
+  const groupCounts = useMemo(() => countByGroup(tabFiltered), [tabFiltered]);
 
   const doSearch = useCallback(() => setSearch(searchInput), [searchInput]);
+
+  const toggleGroup = useCallback((id) => {
+    setGroupSel(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearGroups = useCallback(() => setGroupSel(new Set()), []);
+
   const clearAll = () => {
     setTab('all');
     setBrand('');
     setSearch('');
     setSearchInput('');
+    setGroupSel(new Set());
   };
 
   return (
@@ -123,7 +144,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
             {b.label}
           </button>
         ))}
-        {(brand || search || tab !== 'all') && (
+        {(brand || search || tab !== 'all' || groupSel.size > 0) && (
           <button onClick={clearAll}
             style={{ padding:'7px 14px', border:'none', background:'none', color:'#888', fontFamily:'var(--fm)', fontSize:'7.5px', letterSpacing:'.1em', cursor:'pointer', textDecoration:'underline' }}>
             CLEAR
@@ -131,26 +152,37 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
         )}
       </div>
 
-      {/* Product Grid */}
-      <div style={{ padding: '32px 40px', minHeight: '50vh', background: '#fff' }}>
-        {loading ? (
-          <LoadingScreen message="LOADING PRODUCTS..." />
-        ) : error ? (
-          <EmptyState icon="!" title="COULDN'T LOAD PRODUCTS"
-            subtitle={error || 'Please check your connection and try again.'}
-            action="RETRY" onAction={() => window.location.reload()} />
-        ) : safeProducts.length === 0 ? (
-          <EmptyState icon="O" title="NO PRODUCTS FOUND"
-            subtitle={search ? `No results for "${search}"` : 'Try a different brand or filter'}
-            action="CLEAR FILTERS" onAction={clearAll} />
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0' }}>
-            {safeProducts.map(p => (
-              <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
-                onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
-            ))}
-          </div>
-        )}
+      {/* Sidebar + Grid layout */}
+      <div className="shop-layout">
+        <aside className="shop-filters">
+          <CategoryFilterSidebar
+            selected={groupSel}
+            counts={groupCounts}
+            onToggle={toggleGroup}
+            onClear={clearGroups}
+          />
+        </aside>
+
+        <div className="shop-grid" style={{ minHeight: '50vh', background: '#fff' }}>
+          {loading ? (
+            <LoadingScreen message="LOADING PRODUCTS..." />
+          ) : error ? (
+            <EmptyState icon="!" title="COULDN'T LOAD PRODUCTS"
+              subtitle={error || 'Please check your connection and try again.'}
+              action="RETRY" onAction={() => window.location.reload()} />
+          ) : safeProducts.length === 0 ? (
+            <EmptyState icon="O" title="NO PRODUCTS FOUND"
+              subtitle={search ? `No results for "${search}"` : 'Try a different filter'}
+              action="CLEAR FILTERS" onAction={clearAll} />
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0' }}>
+              {safeProducts.map(p => (
+                <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
+                  onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <Footer setPage={setPage} />
