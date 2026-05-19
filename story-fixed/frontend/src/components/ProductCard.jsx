@@ -1,36 +1,108 @@
-// ProductCard — clean black & white card
+// ProductCard — premium luxury monochrome card.
+// Renders three derived badges (NEW / SALE / GENUINE), a circular
+// wishlist button, and smooth hover micro-interactions. The component
+// signature is unchanged so all existing callsites (ShopPage, HomePage,
+// DetailPage related) keep working.
 import { fp, pct } from '../utils.js';
 
+// Heart glyph — outline by default, filled when wished. Uses the standard
+// Feather-style heart so it sits cleanly at small sizes.
+function HeartIcon({ filled }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+      <path d="M1.5 4.7 l2.1 2.1 4-4" />
+    </svg>
+  );
+}
+
 export default function ProductCard({ product, onClick, onQuickAdd, isWish, onToggleWish }) {
-  const discount = pct(product.orig_price, product.price);
+  const discount  = pct(product?.orig_price, product?.price);
+  const tagUpper  = (product?.tag || '').toString().toUpperCase().trim();
+
+  // Derived flags
+  const isNew     = tagUpper === 'NEW';
+  const isSale    = discount > 0;
+  // Any non-NEW custom tag (e.g. EXCLUSIVE, BESTSELLER) — preserves the
+  // pre-existing single-tag behaviour without doubling up with the NEW badge.
+  const otherTag  = !isNew && tagUpper ? tagUpper : null;
+
   return (
     <div className="pc" onClick={onClick}>
       <div className="pc-img">
-        <span className="pc-icon">{product.icon || '◉'}</span>
-        {/* Wishlist button */}
+        <span className="pc-icon">{product?.icon || '\u25C9'}</span>
+
+        {/* Top-left badge stack — NEW + SALE may both apply */}
+        {(isNew || isSale || otherTag) && (
+          <div className="pc-badges" aria-hidden="true">
+            {isNew && <span className="pc-badge pc-badge-new">NEW</span>}
+            {isSale && (
+              <span className="pc-badge pc-badge-sale">
+                <span>SALE</span>
+                <span className="pc-badge-pct">{`\u2212${discount}%`}</span>
+              </span>
+            )}
+            {otherTag && <span className="pc-badge pc-badge-tag">{otherTag}</span>}
+          </div>
+        )}
+
+        {/* Wishlist (top-right, circular, hover-scaled) */}
         <button
-          onClick={e => { e.stopPropagation(); onToggleWish && onToggleWish(product.id); }}
-          style={{ position:'absolute', top:12, right:12, background:'none', border:'none', cursor:'pointer', fontSize:'18px', opacity: isWish ? 1 : .4, lineHeight:1, color:'#111' }}>
-          {isWish ? '♥' : '♡'}
+          type="button"
+          className={`pc-wish${isWish ? ' is-on' : ''}`}
+          onClick={e => { e.stopPropagation(); if (onToggleWish) onToggleWish(product?.id); }}
+          aria-label={isWish ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-pressed={!!isWish}
+        >
+          <HeartIcon filled={!!isWish} />
         </button>
-      </div>
-      {product.tag && <div className="pc-tag">{product.tag}</div>}
-      {discount > 0 && (
-        <div style={{ position:'absolute', top:12, left:12, background:'#111', color:'#fff', fontFamily:'var(--fm)', fontSize:'7px', letterSpacing:'.1em', padding:'4px 10px', fontWeight:700 }}>
-          -{discount}%
+
+        {/* GENUINE wordmark — bottom-left, revealed on hover. STORY's
+            authenticity promise applies to every product. */}
+        <div className="pc-genuine" aria-label="Authenticity guaranteed">
+          <CheckIcon />
+          <span>GENUINE</span>
         </div>
-      )}
+      </div>
+
       <div className="pc-body">
-        <div style={{ fontFamily:'var(--fm)', fontSize:'8px', letterSpacing:'.15em', color:'#888', marginBottom:4, fontWeight:600 }}>{product.brand}</div>
-        <div style={{ fontFamily:'var(--fm)', fontSize:'10px', letterSpacing:'.03em', marginBottom:10, fontWeight:500 }}>{product.name}</div>
+        <div style={{ fontFamily:'var(--fm)', fontSize:'8px', letterSpacing:'.15em', color:'#888', marginBottom:4, fontWeight:600 }}>
+          {product?.brand || ''}
+        </div>
+        <div style={{ fontFamily:'var(--fm)', fontSize:'10px', letterSpacing:'.03em', marginBottom:10, fontWeight:500 }}>
+          {product?.name || ''}
+        </div>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:14 }}>
-          <span style={{ fontFamily:'var(--fm)', fontSize:'12px', letterSpacing:'.02em', fontWeight:600 }}>{fp(product.price)}</span>
-          {discount > 0 && <span style={{ fontFamily:'var(--fm)', fontSize:'8px', color:'#999', textDecoration:'line-through' }}>{fp(product.orig_price)}</span>}
+          <span style={{ fontFamily:'var(--fm)', fontSize:'12px', letterSpacing:'.02em', fontWeight:600 }}>
+            {fp(product?.price)}
+          </span>
+          {isSale && (
+            <span style={{ fontFamily:'var(--fm)', fontSize:'8px', color:'#999', textDecoration:'line-through' }}>
+              {fp(product?.orig_price)}
+            </span>
+          )}
         </div>
         <button
-          className="btn btn-k"
-          style={{ width:'100%', fontSize:'7.5px', padding:'11px', letterSpacing:'.2em' }}
-          onClick={e => { e.stopPropagation(); onQuickAdd && onQuickAdd(product.id); }}>
+          className="btn btn-k pc-quick"
+          onClick={e => { e.stopPropagation(); if (onQuickAdd) onQuickAdd(product?.id); }}
+        >
           QUICK ADD
         </button>
       </div>
