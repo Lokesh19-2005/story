@@ -2,7 +2,10 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { useStore } from './hooks/useStore.js';
-import { useProducts } from './hooks/useProducts.js';
+// useProducts (backend API) is left in place but the storefront now reads
+// from the centralized static catalog while temporary frontend rendering
+// is in effect. See src/data/products.js + src/hooks/useStaticProducts.js.
+import { useStaticProducts as useProducts } from './hooks/useStaticProducts.js';
 import { ToastProvider, useToast } from './components/Toast.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 

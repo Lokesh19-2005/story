@@ -1,12 +1,25 @@
 // src/pages/DetailPage.jsx — Product Detail with Stock Display
+//
+// Sources product data from the centralized static catalog
+// (src/data/products.js) via the schema adapter, instead of the backend
+// API. The legacy productsAPI calls (productsAPI.list / detail / related)
+// have been replaced with synchronous lookups so the PDP renders
+// immediately and never shows "Couldn't load product" due to a network
+// failure. All gallery, size/color, stock, breadcrumb, and related-rail
+// UX is preserved unchanged.
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { productsAPI } from '../services/api.js';
 import { fp, pct } from '../utils.js';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import ProductCard from '../components/ProductCard.jsx';
 import SmartImage from '../components/SmartImage.jsx';
 import { getProductImages } from '../utils/productImages.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import PRODUCTS from '../data/products.js';
+import { adaptProducts } from '../data/adapter.js';
+
+// Adapt the catalog once at module load — every render reuses the same
+// referentially-stable array.
+const ADAPTED_PRODUCTS = adaptProducts(PRODUCTS);
 
 export default function DetailPage({ productId, addCart, openDrawer, setPage, openDetail, quickAdd, isWish, togWish, toast }) {
   const { isLoggedIn } = useAuth();
@@ -28,7 +41,7 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
     [product]
   );
 
-  const loadProduct = useCallback(async () => {
+  const loadProduct = useCallback(() => {
     if (!productId) {
       setError('No product selected');
       setLoading(false);
@@ -43,44 +56,30 @@ export default function DetailPage({ productId, addCart, openDrawer, setPage, op
     setQty(1);
     setActiveImg(0);
 
-    try {
-      // Fetch all products to find by id, then get detail by slug
-      const listRes = await productsAPI.list({ limit: 100 });
-      const list = Array.isArray(listRes?.products) ? listRes.products : [];
-      const match = list.find(x => String(x?.id) === String(productId));
-      if (!match || !match.slug) {
-        throw new Error('Product not found');
-      }
-
-      const detailRes = await productsAPI.detail(match.slug);
-      const p = detailRes?.product;
-      if (!p) {
-        throw new Error('Product details unavailable');
-      }
-
-      // Normalize fields so downstream rendering is always safe
-      const safeProduct = {
-        ...p,
-        sizes:    Array.isArray(p.sizes)  ? p.sizes  : [],
-        colors:   Array.isArray(p.colors) ? p.colors : [],
-        stockMap: p.stockMap && typeof p.stockMap === 'object' ? p.stockMap : {},
-      };
-
-      setProduct(safeProduct);
-      setSelSize(safeProduct.sizes[0] || '');
-      setSelColor(safeProduct.colors[0] || null);
-
-      // Load related — failure here should not break the page
-      productsAPI.related(safeProduct.slug)
-        .then(r => setRelated(Array.isArray(r?.products) ? r.products : []))
-        .catch(err => { console.warn('[DetailPage related]', err?.message); setRelated([]); });
-    } catch (err) {
-      console.warn('[DetailPage fetch]', err?.message);
-      setError(err?.message || 'Failed to load product');
+    // Look up the product in the static catalog. The adapter has already
+    // normalised sizes / colors / stockMap into the legacy shape this page
+    // was written against, so no further normalisation is needed.
+    const match = ADAPTED_PRODUCTS.find(x => String(x?.id) === String(productId));
+    if (!match) {
+      setError('Product not found');
       setProduct(null);
-    } finally {
+      setRelated([]);
       setLoading(false);
+      return;
     }
+
+    setProduct(match);
+    setSelSize(match.sizes[0] || '');
+    setSelColor(match.colors[0] || null);
+
+    // Related: same backend category, exclude self, capped at 4. Matches
+    // the previous productsAPI.related contract that drove this rail.
+    const rel = ADAPTED_PRODUCTS
+      .filter(p => p.category_slug === match.category_slug && p.slug !== match.slug)
+      .slice(0, 4);
+    setRelated(rel);
+
+    setLoading(false);
   }, [productId]);
 
   useEffect(() => { loadProduct(); }, [loadProduct]);
