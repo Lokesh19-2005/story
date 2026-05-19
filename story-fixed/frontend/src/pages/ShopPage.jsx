@@ -1,10 +1,12 @@
 // ShopPage — with real brands list, filter sidebar, search
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useProducts } from '../hooks/useProducts.js';
 import ProductCard from '../components/ProductCard.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Footer from '../components/Footer.jsx';
+import CategoryTabs from '../components/CategoryTabs.jsx';
+import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 
 const BRANDS = [
   { slug: '', label: 'ALL' },
@@ -31,23 +33,36 @@ const SORTS = [
 ];
 
 export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWish }) {
-  const [brand, setBrand] = useState('');
-  const [sort, setSort] = useState('newest');
+  const [tab, setTab]       = useState('all');
+  const [brand, setBrand]   = useState('');
+  const [sort, setSort]     = useState('newest');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [cols, setCols] = useState(3);
+  const [cols, setCols]     = useState(3);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const params = {};
-  if (brand) params.brand = brand;
-  if (sort) params.sort = sort;
-  if (search) params.search = search;
+  const catSlug = tabToCategorySlug(tab);
+  if (catSlug) params.category = catSlug;
+  if (brand)   params.brand    = brand;
+  if (sort)    params.sort     = sort;
+  if (search)  params.search   = search;
 
   const { products, loading, error } = useProducts(params);
-  const safeProducts = Array.isArray(products) ? products : [];
+  // Server filters by category; tabs that need finer granularity (jeans,
+  // pants, knit, headwear) refine the slice on the client. ALL = passthrough.
+  const safeProducts = useMemo(
+    () => refineByTab(Array.isArray(products) ? products : [], tab),
+    [products, tab]
+  );
 
   const doSearch = useCallback(() => setSearch(searchInput), [searchInput]);
-  const clearAll = () => { setBrand(''); setSearch(''); setSearchInput(''); };
+  const clearAll = () => {
+    setTab('all');
+    setBrand('');
+    setSearch('');
+    setSearchInput('');
+  };
 
   return (
     <div>
@@ -90,6 +105,9 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
         </div>
       </div>
 
+      {/* Category tabs — primary axis */}
+      <CategoryTabs value={tab} onChange={setTab} />
+
       {/* Brand filter pills */}
       <div style={{ borderBottom: 'var(--bd)', padding: '14px 40px', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', background: '#fafafa', overflowX: 'auto' }}>
         {BRANDS.map(b => (
@@ -105,7 +123,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
             {b.label}
           </button>
         ))}
-        {(brand || search) && (
+        {(brand || search || tab !== 'all') && (
           <button onClick={clearAll}
             style={{ padding:'7px 14px', border:'none', background:'none', color:'#888', fontFamily:'var(--fm)', fontSize:'7.5px', letterSpacing:'.1em', cursor:'pointer', textDecoration:'underline' }}>
             CLEAR
