@@ -9,6 +9,7 @@ import CategoryTabs from '../components/CategoryTabs.jsx';
 import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
 import SortDropdown from '../components/SortDropdown.jsx';
 import GridSwitcher from '../components/GridSwitcher.jsx';
+import MobileFilterDrawer from '../components/MobileFilterDrawer.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';
 import { filterByBrands, countByBrands } from '../utils/brandList.js';
@@ -33,6 +34,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   const [search, setSearch]         = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [cols, setCols]             = useState(3);
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   const params = {};
   const catSlug = tabToCategorySlug(tab);
@@ -133,6 +135,10 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
     sizeSel.size > 0 ||
     priceSel.size > 0 ||
     !!search;
+  // Sum of selected sidebar filters — surfaced as a small badge on the
+  // mobile FILTERS button so users know they have active selections.
+  const sidebarFilterCount =
+    groupSel.size + brandSel.size + sizeSel.size + priceSel.size;
   const clearAll = () => {
     setTab('all');
     setGroupSel(new Set());
@@ -170,6 +176,22 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
 
         {/* Sort */}
         <SortDropdown value={sort} options={SORTS} onChange={setSort} />
+
+        {/* Mobile-only filter trigger — desktop uses the always-visible sidebar */}
+        <button
+          type="button"
+          className="mobile-filter-btn"
+          onClick={() => setFilterDrawerOpen(true)}
+          aria-label="Open filters"
+        >
+          <svg width="14" height="11" viewBox="0 0 14 11" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+            <path d="M0 1.5h14M2 5.5h10M4 9.5h6" strokeLinecap="square" />
+          </svg>
+          FILTERS
+          {sidebarFilterCount > 0 && (
+            <span className="mobile-filter-btn-count">{sidebarFilterCount}</span>
+          )}
+        </button>
 
         {/* Grid cols — hidden on mobile */}
         <GridSwitcher cols={cols} onChange={setCols} className="col-switcher" />
@@ -229,6 +251,31 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
           )}
         </div>
       </div>
+
+      {/* Mobile filter drawer — wraps the same CategoryFilterSidebar so
+          desktop and mobile share one filter implementation */}
+      <MobileFilterDrawer
+        open={filterDrawerOpen}
+        onClose={() => setFilterDrawerOpen(false)}
+        productCount={safeProducts.length}
+        onClearAll={clearAll}
+        selected={groupSel}
+        counts={groupCounts}
+        onToggle={toggleGroup}
+        onClear={clearGroups}
+        selectedBrands={brandSel}
+        brandCounts={brandCounts}
+        onToggleBrand={toggleBrand}
+        onClearBrands={clearBrands}
+        selectedSizes={sizeSel}
+        sizeCounts={sizeCounts}
+        onToggleSize={toggleSize}
+        onClearSizes={clearSizes}
+        selectedPrices={priceSel}
+        priceCounts={priceCounts}
+        onTogglePrice={togglePrice}
+        onClearPrices={clearPrices}
+      />
 
       <Footer setPage={setPage} />
 
