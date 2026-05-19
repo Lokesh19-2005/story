@@ -1,4 +1,4 @@
-// ShopPage — with real brands list, filter sidebar, search
+// ShopPage — sidebar-driven filtering, search, sort
 import { useState, useCallback, useMemo } from 'react';
 import { useProducts } from '../hooks/useProducts.js';
 import ProductCard from '../components/ProductCard.jsx';
@@ -9,63 +9,55 @@ import CategoryTabs from '../components/CategoryTabs.jsx';
 import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';
-
-const BRANDS = [
-  { slug: '', label: 'ALL' },
-  { slug: 'versace', label: 'VERSACE' },
-  { slug: 'karl-lagerfeld', label: 'KARL LAGERFELD' },
-  { slug: 'lacoste', label: 'LACOSTE' },
-  { slug: 'superdry', label: 'SUPERDRY' },
-  { slug: 'tommy-hilfiger', label: 'TOMMY HILFIGER' },
-  { slug: 'burberry', label: 'BURBERRY' },
-  { slug: 'true-religion', label: 'TRUE RELIGION' },
-  { slug: 'rare-rabbit', label: 'RARE RABBIT' },
-  { slug: 'blackberrys', label: 'BLACKBERRYS' },
-  { slug: 'zara', label: 'ZARA' },
-  { slug: 'calvin-klein', label: 'CALVIN KLEIN' },
-  { slug: 'michael-kors', label: 'MICHAEL KORS' },
-  { slug: 'hugo-boss', label: 'HUGO BOSS' },
-  { slug: 'ralph-lauren', label: 'RALPH LAUREN' },
-];
+import { filterByBrands, countByBrands } from '../utils/brandList.js';
 
 const SORTS = [
   { v: 'newest', l: 'NEWEST FIRST' },
-  { v: 'price_asc', l: 'PRICE: LOW → HIGH' },
-  { v: 'price_desc', l: 'PRICE: HIGH → LOW' },
+  { v: 'price_asc', l: 'PRICE: LOW \u2192 HIGH' },
+  { v: 'price_desc', l: 'PRICE: HIGH \u2192 LOW' },
 ];
 
 export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWish }) {
-  const [tab, setTab]       = useState('all');
-  const [brand, setBrand]   = useState('');
-  const [sort, setSort]     = useState('newest');
-  const [search, setSearch] = useState('');
+  const [tab, setTab]               = useState('all');
+  const [groupSel, setGroupSel]     = useState(() => new Set());
+  const [brandSel, setBrandSel]     = useState(() => new Set());
+  const [sort, setSort]             = useState('newest');
+  const [search, setSearch]         = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const [cols, setCols]     = useState(3);
-  const [groupSel, setGroupSel] = useState(() => new Set());
+  const [cols, setCols]             = useState(3);
 
   const params = {};
   const catSlug = tabToCategorySlug(tab);
   if (catSlug) params.category = catSlug;
-  if (brand)   params.brand    = brand;
   if (sort)    params.sort     = sort;
   if (search)  params.search   = search;
 
   const { products, loading, error } = useProducts(params);
 
-  // Pipeline: server (category/brand/sort/search) -> tab refinement ->
-  // sidebar group filter. Each stage is a pure transform of an array.
+  // Pipeline: server (category/sort/search) -> tab refine -> sidebar groups
+  // -> sidebar brands. Each stage is a pure transform on an array.
   const tabFiltered = useMemo(
     () => refineByTab(Array.isArray(products) ? products : [], tab),
     [products, tab]
   );
-  const safeProducts = useMemo(
-    () => filterByGroups(tabFiltered, groupSel),
+
+  // Counts use cross-axis filtering so each section's numbers reflect what
+  // would happen if the user ticked that option, given the OTHER axes.
+  const groupCounts = useMemo(
+    () => countByGroup(filterByBrands(tabFiltered, brandSel)),
+    [tabFiltered, brandSel]
+  );
+  const brandCounts = useMemo(
+    () => countByBrands(filterByGroups(tabFiltered, groupSel)),
     [tabFiltered, groupSel]
   );
-  // Counts for the sidebar — show how many of the currently visible (pre-group)
-  // products fall into each meta-group, so the user sees what each tick adds.
-  const groupCounts = useMemo(() => countByGroup(tabFiltered), [tabFiltered]);
 
+  const safeProducts = useMemo(
+    () => filterByBrands(filterByGroups(tabFiltered, groupSel), brandSel),
+    [tabFiltered, groupSel, brandSel]
+  );
+
+  // ── Handlers
   const doSearch = useCallback(() => setSearch(searchInput), [searchInput]);
 
   const toggleGroup = useCallback((id) => {
@@ -77,12 +69,22 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   }, []);
   const clearGroups = useCallback(() => setGroupSel(new Set()), []);
 
+  const toggleBrand = useCallback((id) => {
+    setBrandSel(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+  const clearBrands = useCallback(() => setBrandSel(new Set()), []);
+
+  const hasAnyFilter = tab !== 'all' || groupSel.size > 0 || brandSel.size > 0 || !!search;
   const clearAll = () => {
     setTab('all');
-    setBrand('');
+    setGroupSel(new Set());
+    setBrandSel(new Set());
     setSearch('');
     setSearchInput('');
-    setGroupSel(new Set());
   };
 
   return (
@@ -106,7 +108,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
           </button>
           {search && (
             <button className="btn btn-w" style={{ fontSize: '8px', padding: '10px 12px' }}
-              onClick={() => { setSearch(''); setSearchInput(''); }}>✕</button>
+              onClick={() => { setSearch(''); setSearchInput(''); }}>{'\u2715'}</button>
           )}
         </div>
 
@@ -120,37 +122,21 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
           {[2, 3, 4].map(n => (
             <button key={n} onClick={() => setCols(n)}
               style={{ width: 34, height: 34, border: cols === n ? '2px solid #111' : 'var(--bd)', background: cols === n ? '#111' : '#fff', color: cols === n ? '#fff' : '#111', fontFamily: 'var(--fm)', fontSize: '9px', cursor: 'pointer', transition: 'all .15s', fontWeight: 600 }}>
-              {n}×
+              {n}{'\u00D7'}
             </button>
           ))}
         </div>
+
+        {hasAnyFilter && (
+          <button onClick={clearAll}
+            style={{ padding:'8px 14px', border:'none', background:'none', color:'#888', fontFamily:'var(--fm)', fontSize:'8px', letterSpacing:'.15em', cursor:'pointer', textDecoration:'underline', fontWeight:600 }}>
+            CLEAR ALL
+          </button>
+        )}
       </div>
 
       {/* Category tabs — primary axis */}
       <CategoryTabs value={tab} onChange={setTab} />
-
-      {/* Brand filter pills */}
-      <div style={{ borderBottom: 'var(--bd)', padding: '14px 40px', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', background: '#fafafa', overflowX: 'auto' }}>
-        {BRANDS.map(b => (
-          <button key={b.slug} onClick={() => setBrand(b.slug)}
-            style={{
-              padding: '7px 18px', whiteSpace: 'nowrap',
-              border: brand === b.slug ? '1.5px solid #111' : '1px solid #ddd',
-              background: brand === b.slug ? '#111' : '#fff',
-              color: brand === b.slug ? '#fff' : '#111',
-              fontFamily: 'var(--fm)', fontSize: '7.5px', letterSpacing: '.15em',
-              cursor: 'pointer', transition: 'all .15s', fontWeight: 600,
-            }}>
-            {b.label}
-          </button>
-        ))}
-        {(brand || search || tab !== 'all' || groupSel.size > 0) && (
-          <button onClick={clearAll}
-            style={{ padding:'7px 14px', border:'none', background:'none', color:'#888', fontFamily:'var(--fm)', fontSize:'7.5px', letterSpacing:'.1em', cursor:'pointer', textDecoration:'underline' }}>
-            CLEAR
-          </button>
-        )}
-      </div>
 
       {/* Sidebar + Grid layout */}
       <div className="shop-layout">
@@ -160,6 +146,10 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
             counts={groupCounts}
             onToggle={toggleGroup}
             onClear={clearGroups}
+            selectedBrands={brandSel}
+            brandCounts={brandCounts}
+            onToggleBrand={toggleBrand}
+            onClearBrands={clearBrands}
           />
         </aside>
 
@@ -191,8 +181,6 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
         @media (max-width: 640px) {
           .col-switcher { display: none !important; }
         }
-        .brand-pill-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .brand-pill-bar::-webkit-scrollbar { height: 0; }
       `}</style>
     </div>
   );
