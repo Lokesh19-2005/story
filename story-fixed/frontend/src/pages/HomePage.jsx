@@ -413,59 +413,65 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         .hp-section {
           max-width: 1440px;
           margin: 0 auto;
-          padding: 96px 40px;
+          padding: 120px 48px;
         }
 
         .hp-section-head {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          margin-bottom: 44px;
+          margin-bottom: 56px;
           gap: 24px;
           flex-wrap: wrap;
+          padding-bottom: 28px;
+          border-bottom: 1px solid #ececec;
         }
         .hp-section-head-center {
           flex-direction: column;
           align-items: center;
           text-align: center;
-          margin-bottom: 56px;
+          margin-bottom: 64px;
+          padding-bottom: 0;
+          border-bottom: none;
         }
 
         .hp-eyebrow {
           font-family: var(--fm);
-          font-size: 8px;
-          letter-spacing: .35em;
-          color: var(--warm);
+          font-size: 8.5px;
+          letter-spacing: .38em;
+          color: #888;
           text-transform: uppercase;
-          margin-bottom: 14px;
+          margin-bottom: 16px;
           font-weight: 500;
         }
 
         .hp-section-title {
-          font-family: var(--fs);
-          font-size: clamp(40px, 5.6vw, 72px);
-          letter-spacing: .025em;
+          font-family: var(--fm);
+          font-size: clamp(36px, 5.2vw, 68px);
+          letter-spacing: -.02em;
           line-height: .95;
-          font-weight: 400;
+          font-weight: 900;
           margin: 0;
           color: #111;
+          text-transform: uppercase;
         }
 
-        /* Outlined display variants — the signature element of the page. */
+        /* Outlined display variants — the signature element of the page.
+           Used at heavy (900) weight, so strokes are scaled accordingly. */
         .hp-h-fill {
           color: #111;
         }
         .hp-h-outline {
-          -webkit-text-stroke: 1.5px #111;
+          -webkit-text-stroke: 2.5px #111;
           color: transparent;
-          letter-spacing: .03em;
+          letter-spacing: -.005em;
         }
         .hp-h-outline-sm {
-          -webkit-text-stroke: 1px #111;
+          -webkit-text-stroke: 1.4px #111;
           color: transparent;
         }
         .hp-h-outline-on-dark {
-          -webkit-text-stroke: 1.5px #fff;
+          -webkit-text-stroke: 1.6px #fff;
           color: transparent;
         }
 
@@ -559,14 +565,14 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         .hp-hero {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          min-height: clamp(620px, 86vh, 880px);
+          min-height: clamp(680px, 88vh, 920px);
           background: #fff;
-          border-bottom: 1px solid #e6e6e6;
+          border-bottom: 1px solid #ececec;
         }
 
         /* LEFT — editorial copy on white */
         .hp-hero-left {
-          padding: clamp(60px, 8vw, 110px) clamp(40px, 6vw, 96px);
+          padding: clamp(80px, 9vw, 132px) clamp(40px, 6.5vw, 104px);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -575,39 +581,40 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         .hp-hero-eyebrow {
           display: inline-flex;
           align-items: center;
-          gap: 14px;
+          gap: 16px;
           font-family: var(--fm);
-          font-size: 9px;
+          font-size: 9.5px;
           letter-spacing: .42em;
-          color: var(--warm);
-          margin-bottom: 36px;
+          color: #666;
+          margin-bottom: 44px;
           font-weight: 500;
           text-transform: uppercase;
         }
         .hp-hero-eyebrow-rule {
-          width: 44px; height: 1px;
+          width: 52px; height: 1px;
           background: #111;
           opacity: .55;
         }
 
         .hp-hero-title {
-          font-family: var(--fs);
-          font-size: clamp(72px, 11vw, 168px);
-          line-height: .88;
-          letter-spacing: .015em;
-          font-weight: 400;
+          font-family: var(--fm);
+          font-size: clamp(64px, 9.5vw, 152px);
+          line-height: .92;
+          letter-spacing: -.025em;
+          font-weight: 900;
           color: #111;
-          margin: 0 0 28px;
+          margin: 0 0 36px;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 0;
+          text-transform: uppercase;
         }
 
         .hp-hero-divider {
           height: 1px;
           background: #111;
-          width: min(100%, 580px);
-          margin: 8px 0 28px;
+          width: min(100%, 620px);
+          margin: 4px 0 36px;
           transform-origin: left;
           animation: hpRuleIn 1.1s cubic-bezier(.2,.7,.2,1) .1s both;
         }
@@ -618,17 +625,18 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
 
         .hp-hero-lede {
           font-family: var(--fm);
-          font-size: 12px;
+          font-size: 12.5px;
           line-height: 1.85;
-          letter-spacing: .025em;
-          color: #444;
+          letter-spacing: .015em;
+          color: #555;
           max-width: 460px;
-          margin: 0 0 36px;
+          margin: 0 0 44px;
+          font-weight: 400;
         }
 
         .hp-hero-cta {
           display: flex;
-          gap: 18px;
+          gap: 22px;
           align-items: center;
           flex-wrap: wrap;
         }
@@ -646,10 +654,22 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           position: absolute;
           inset: 0;
           background:
-            radial-gradient(60% 50% at 65% 40%,
-              rgba(255,255,255,.05) 0%,
+            radial-gradient(70% 55% at 60% 40%,
+              rgba(255,255,255,.06) 0%,
               rgba(255,255,255,0) 70%);
           pointer-events: none;
+        }
+        /* Fine grain — adds tactile "luxury paper" feel */
+        .hp-hero-right::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image:
+            radial-gradient(rgba(255,255,255,.025) 1px, transparent 1px);
+          background-size: 3px 3px;
+          opacity: .5;
+          pointer-events: none;
+          mix-blend-mode: overlay;
         }
 
         /* Overlapping decorative frames (3 squares, layered + offset) */
@@ -662,101 +682,106 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
         .hp-frame {
           position: absolute;
-          width: clamp(180px, 30%, 280px);
+          width: clamp(190px, 32%, 300px);
           aspect-ratio: 1/1;
-          border: 1px solid rgba(255,255,255,.06);
+          border: 1px solid rgba(255,255,255,.05);
           background: #1a1a1a;
-          transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+          transition: transform 1.4s cubic-bezier(.2,.7,.2,1);
           will-change: transform;
         }
         .hp-frame-1 {
-          transform: translate(-86px, -56px) rotate(-6deg);
+          transform: translate(-94px, -64px) rotate(-7deg);
           background: #161616;
-          opacity: .85;
+          opacity: .82;
         }
         .hp-frame-2 {
           transform: translate(0, 0) rotate(0deg);
           background: #1f1f1f;
           overflow: hidden;
           z-index: 2;
-          box-shadow: 0 30px 80px rgba(0,0,0,.6);
+          box-shadow: 0 40px 100px rgba(0,0,0,.7);
         }
         .hp-frame-3 {
-          transform: translate(86px, 56px) rotate(5deg);
+          transform: translate(94px, 64px) rotate(6deg);
           background: #131313;
           opacity: .9;
         }
         .hp-hero-right:hover .hp-frame-1 {
-          transform: translate(-96px, -64px) rotate(-7deg);
+          transform: translate(-108px, -74px) rotate(-9deg);
         }
         .hp-hero-right:hover .hp-frame-3 {
-          transform: translate(96px, 64px) rotate(6deg);
+          transform: translate(108px, 74px) rotate(8deg);
         }
         .hp-frame-img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          opacity: .82;
-          filter: grayscale(.18) contrast(1.02);
-          transition: opacity .8s ease, transform 1.4s ease;
+          opacity: .8;
+          filter: grayscale(.22) contrast(1.04);
+          transition: opacity .9s ease, transform 1.6s ease, filter .9s ease;
         }
         .hp-hero-right:hover .hp-frame-img {
-          opacity: .92;
-          transform: scale(1.04);
+          opacity: .94;
+          transform: scale(1.05);
+          filter: grayscale(.05) contrast(1.04);
         }
 
         /* Sparkle dingbats */
         .hp-spark {
           position: absolute;
           color: rgba(255,255,255,.55);
-          font-size: 14px;
           pointer-events: none;
           animation: hpTwinkle 4.6s ease-in-out infinite;
         }
-        .hp-spark-1 { top: 18%; right: 14%; font-size: 12px; }
-        .hp-spark-2 { top: 56%; left: 12%; font-size: 11px; animation-delay: 1.6s; }
+        .hp-spark-1 { top: 16%; right: 13%; font-size: 13px; }
+        .hp-spark-2 { top: 58%; left: 11%; font-size: 11px; animation-delay: 1.6s; }
         @keyframes hpTwinkle {
-          0%, 100% { opacity: .35; transform: scale(1); }
-          50%      { opacity: .9;  transform: scale(1.18); }
+          0%, 100% { opacity: .3; transform: scale(1); }
+          50%      { opacity: .9; transform: scale(1.2); }
         }
 
         /* Featured-product overlay card */
         .hp-feature-card {
           position: absolute;
-          right: clamp(24px, 4vw, 52px);
-          bottom: clamp(110px, 16vh, 160px);
-          padding: 18px 22px;
-          background: rgba(20,20,20,.78);
+          right: clamp(28px, 4.5vw, 56px);
+          bottom: clamp(120px, 17vh, 172px);
+          padding: 20px 24px;
+          background: rgba(18,18,18,.78);
           border: 1px solid rgba(255,255,255,.08);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           color: #fff;
           text-align: left;
           cursor: pointer;
-          min-width: 220px;
+          min-width: 232px;
           z-index: 3;
-          transition: transform .3s ease, background .3s ease, border-color .3s ease;
+          transition: transform .4s cubic-bezier(.2,.7,.2,1),
+                      background .3s ease,
+                      border-color .3s ease,
+                      box-shadow .4s ease;
         }
         .hp-feature-card:hover {
-          transform: translateY(-3px);
-          background: rgba(28,28,28,.86);
-          border-color: rgba(255,255,255,.18);
+          transform: translateY(-4px);
+          background: rgba(26,26,26,.88);
+          border-color: rgba(255,255,255,.22);
+          box-shadow: 0 20px 50px rgba(0,0,0,.5);
         }
         .hp-feature-eyebrow {
           font-family: var(--fm);
           font-size: 7.5px;
-          letter-spacing: .35em;
-          color: rgba(255,255,255,.6);
+          letter-spacing: .38em;
+          color: rgba(255,255,255,.55);
           font-weight: 500;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
         }
         .hp-feature-name {
-          font-family: var(--fs);
-          font-size: 18px;
-          letter-spacing: .055em;
-          font-weight: 400;
-          margin-bottom: 6px;
+          font-family: var(--fm);
+          font-size: 13px;
+          letter-spacing: .12em;
+          font-weight: 700;
+          margin-bottom: 8px;
           color: #fff;
+          text-transform: uppercase;
         }
         .hp-feature-prices {
           display: flex;
@@ -765,45 +790,49 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
         .hp-feature-price {
           font-family: var(--fm);
-          font-size: 11px;
+          font-size: 11.5px;
           font-weight: 600;
           color: #fff;
           letter-spacing: .04em;
         }
         .hp-feature-strike {
           font-family: var(--fm);
-          font-size: 10px;
-          color: rgba(255,255,255,.45);
+          font-size: 10.5px;
+          color: rgba(255,255,255,.42);
           text-decoration: line-through;
           letter-spacing: .04em;
         }
 
-        /* Stat blocks */
+        /* Stat blocks — proper card treatment with rule above */
         .hp-stats {
           position: absolute;
-          left: clamp(24px, 4vw, 52px);
-          right: clamp(24px, 4vw, 52px);
-          bottom: clamp(28px, 4vh, 44px);
+          left: clamp(28px, 4.5vw, 56px);
+          right: clamp(28px, 4.5vw, 56px);
+          bottom: clamp(32px, 4.5vh, 48px);
           display: flex;
-          gap: clamp(28px, 4vw, 56px);
+          gap: clamp(36px, 5vw, 72px);
           z-index: 3;
         }
         .hp-stat {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 8px;
+          padding-top: 14px;
+          border-top: 1px solid rgba(255,255,255,.18);
+          min-width: 104px;
         }
         .hp-stat-num {
-          font-family: var(--fs);
-          font-size: clamp(28px, 3.4vw, 42px);
-          letter-spacing: .015em;
+          font-family: var(--fm);
+          font-size: clamp(30px, 3.6vw, 46px);
+          letter-spacing: -.02em;
           color: #fff;
           line-height: 1;
+          font-weight: 900;
         }
         .hp-stat-lbl {
           font-family: var(--fm);
           font-size: 7.5px;
-          letter-spacing: .3em;
+          letter-spacing: .32em;
           color: rgba(255,255,255,.55);
           text-transform: uppercase;
           font-weight: 500;
@@ -812,26 +841,27 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         /* ─── 2. MANIFESTO ─── */
         .hp-manifesto {
           background: var(--off);
-          padding: 72px 40px;
+          padding: 88px 40px;
           text-align: center;
+          border-top: 1px solid #ececec;
+          border-bottom: 1px solid #ececec;
         }
         .hp-manifesto p {
-          font-family: var(--fs);
-          font-size: clamp(22px, 2.8vw, 36px);
-          letter-spacing: .055em;
-          line-height: 1.4;
+          font-family: var(--fm);
+          font-size: clamp(20px, 2.4vw, 30px);
+          letter-spacing: .04em;
+          line-height: 1.5;
           color: #111;
           margin: 0 auto;
-          max-width: 860px;
-          font-weight: 400;
+          max-width: 920px;
+          font-weight: 300;
         }
 
         /* ─── 3 & 7. PRODUCT GRID (4-up) ─── */
         .hp-grid-4 {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 1px;
-          background: #e6e6e6;
+          gap: 40px 28px;
         }
 
         /* ─── 4. TWO-UP EDITORIAL BANNER ─── */
@@ -894,19 +924,20 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
         .hp-banner-eyebrow {
           font-family: var(--fm);
-          font-size: 8px;
-          letter-spacing: .3em;
-          margin-bottom: 14px;
+          font-size: 8.5px;
+          letter-spacing: .35em;
+          margin-bottom: 16px;
           opacity: .9;
           font-weight: 500;
         }
         .hp-banner-title {
-          font-family: var(--fs);
-          font-size: clamp(48px, 6.5vw, 88px);
-          letter-spacing: .025em;
+          font-family: var(--fm);
+          font-size: clamp(44px, 6vw, 84px);
+          letter-spacing: -.02em;
           line-height: .95;
-          margin: 0 0 18px;
-          font-weight: 400;
+          margin: 0 0 22px;
+          font-weight: 900;
+          text-transform: uppercase;
         }
         .hp-banner-cta {
           font-family: var(--fm);
@@ -980,30 +1011,32 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
             rgba(0,0,0,.18) 100%);
         }
         .hp-atlas-label {
-          font-family: var(--fs);
-          font-size: clamp(16px, 1.6vw, 22px);
-          letter-spacing: .14em;
+          font-family: var(--fm);
+          font-size: clamp(12px, 1.3vw, 15px);
+          letter-spacing: .28em;
           color: #fff;
-          text-shadow: 0 1px 3px rgba(0,0,0,.4);
-          font-weight: 400;
+          text-shadow: 0 1px 4px rgba(0,0,0,.45);
+          font-weight: 700;
+          text-transform: uppercase;
         }
 
         /* ─── 6. PULL QUOTE ─── */
         .hp-quote {
           background: #0a0a0a;
           color: #fff;
-          padding: clamp(72px, 12vw, 140px) 40px;
+          padding: clamp(96px, 13vw, 160px) 40px;
           text-align: center;
         }
         .hp-quote-text {
-          font-family: var(--fs);
-          font-size: clamp(36px, 5.5vw, 76px);
-          letter-spacing: .035em;
-          line-height: 1.08;
-          margin: 0 auto 44px;
-          max-width: 980px;
-          font-weight: 400;
+          font-family: var(--fm);
+          font-size: clamp(32px, 5vw, 68px);
+          letter-spacing: -.02em;
+          line-height: 1.05;
+          margin: 0 auto 56px;
+          max-width: 1040px;
+          font-weight: 900;
           color: #fff;
+          text-transform: uppercase;
         }
         .hp-quote-text .hp-h-fill { color: #fff; }
 
@@ -1071,48 +1104,52 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
 
         @media (max-width: 900px) {
-          .hp-section { padding: 64px 20px; }
-          .hp-section-head { margin-bottom: 32px; }
+          .hp-section { padding: 72px 22px; }
+          .hp-section-head { margin-bottom: 36px; padding-bottom: 22px; }
 
           .hp-hero {
             grid-template-columns: 1fr;
             min-height: auto;
           }
           .hp-hero-left {
-            padding: 72px 24px 56px;
+            padding: 88px 26px 64px;
           }
           .hp-hero-right {
-            min-height: 420px;
+            min-height: 460px;
           }
-          .hp-hero-eyebrow { margin-bottom: 24px; }
-          .hp-hero-title { margin-bottom: 22px; }
-          .hp-hero-divider { margin: 4px 0 20px; }
-          .hp-hero-lede { font-size: 11.5px; margin-bottom: 28px; }
-          .hp-hero-cta { gap: 14px; }
-          .hp-cta-primary { padding: 14px 24px; font-size: 9px; }
+          .hp-hero-eyebrow { margin-bottom: 30px; font-size: 9px; }
+          .hp-hero-title { margin-bottom: 26px; }
+          .hp-hero-divider { margin: 4px 0 26px; }
+          .hp-hero-lede { font-size: 12px; margin-bottom: 32px; }
+          .hp-hero-cta { gap: 16px; }
+          .hp-cta-primary { padding: 14px 26px; font-size: 9px; }
           .hp-cta-link { padding: 14px 4px; font-size: 8.5px; }
 
-          .hp-frame { width: clamp(140px, 36vw, 200px); }
-          .hp-frame-1 { transform: translate(-56px, -36px) rotate(-6deg); }
-          .hp-frame-3 { transform: translate(56px, 36px) rotate(5deg); }
+          .hp-frame { width: clamp(150px, 38vw, 220px); }
+          .hp-frame-1 { transform: translate(-60px, -42px) rotate(-7deg); }
+          .hp-frame-3 { transform: translate(60px, 42px) rotate(6deg); }
           .hp-feature-card {
-            right: 20px;
-            bottom: 88px;
-            padding: 14px 18px;
-            min-width: 180px;
+            right: 22px;
+            bottom: 96px;
+            padding: 16px 20px;
+            min-width: 196px;
           }
-          .hp-feature-name { font-size: 16px; }
+          .hp-feature-name { font-size: 12px; }
           .hp-stats {
-            left: 20px; right: 20px; bottom: 20px;
-            gap: 28px;
+            left: 22px; right: 22px; bottom: 22px;
+            gap: 32px;
           }
+          .hp-stat { padding-top: 12px; min-width: 92px; }
 
-          .hp-manifesto { padding: 56px 24px; }
-          .hp-grid-4 { grid-template-columns: repeat(2, 1fr); }
+          .hp-manifesto { padding: 64px 24px; }
+          .hp-grid-4 {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px 16px;
+          }
           .hp-twoup { grid-template-columns: 1fr; }
           .hp-banner-overlay { padding: 32px 28px; }
 
-          .hp-service { padding: 24px 20px; }
+          .hp-service { padding: 26px 22px; }
           .hp-service ul { gap: 18px 36px; }
           .hp-service li { font-size: 8px; letter-spacing: .18em; }
         }
