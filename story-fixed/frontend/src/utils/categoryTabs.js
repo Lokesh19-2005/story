@@ -1,41 +1,51 @@
 // src/utils/categoryTabs.js
 // Single source of truth for the STORY top-category tab rail.
 //
-// Each tab maps to a backend category slug (sent as ?category=... to the
-// existing products API) plus an optional client-side name refinement.
-// This lets us expose more granular labels (JEANS, PANTS, KNIT, HEADWEAR)
-// without modifying any backend routes or data.
+// Tabs are derived directly from src/data/products.js CATEGORIES so the
+// rail always matches the catalog. Each tab maps to a single category_id
+// (the new 7-cat key on adapted products) - no regex narrowing, no
+// legacy slug compression. ALL is the synthetic "no filter" tab.
+//
+// The tab id is identical to the category_id it represents, so the
+// downstream filter (useStaticProducts) can compare directly against
+// `product.category_id`.
 
-export const CATEGORY_TABS = [
-  { id: 'all',         label: 'ALL',         category: '' },
-  { id: 'outerwear',   label: 'OUTWEAR',     category: 'outerwear' },
-  { id: 'headwear',    label: 'HEADWEAR',    category: 'accessories', match: /\b(cap|hat|beanie|headwear|bucket)\b/i },
-  { id: 'knit',        label: 'KNIT',        category: 'tops',        match: /\b(knit|sweater|hoodie|jumper|cardigan|tee)\b/i },
-  { id: 'jeans',       label: 'JEANS',       category: 'bottoms',     match: /\b(jean|denim)\b/i },
-  { id: 'pants',       label: 'PANTS',       category: 'bottoms',     match: /\b(pant|trouser|chino|cargo|short)\b/i },
-  { id: 'shoes',       label: 'SHOES',       category: 'shoes' },
-  { id: 'accessories', label: 'ACCESSORIES', category: 'accessories' },
-];
+import { CATEGORIES } from '../data/products.js';
+
+const ALL_TAB = Object.freeze({ id: 'all', label: 'ALL', categoryId: '' });
+
+export const CATEGORY_TABS = Object.freeze([
+  ALL_TAB,
+  ...CATEGORIES.map(c => ({ id: c.id, label: c.label, categoryId: c.id })),
+]);
 
 /** Return the tab definition for a given id, defaulting to ALL. */
 export function getTab(id) {
-  return CATEGORY_TABS.find(t => t.id === id) || CATEGORY_TABS[0];
-}
-
-/** Backend category slug to send on the products API for a tab id. */
-export function tabToCategorySlug(id) {
-  return getTab(id).category;
+  return CATEGORY_TABS.find(t => t.id === id) || ALL_TAB;
 }
 
 /**
- * Apply the optional client-side name refinement for a tab.
- * Server has already narrowed by category; this further refines the slice.
+ * Canonical name: the category_id this tab represents. Returns '' for ALL
+ * so callers can use a falsy check to skip the category filter.
  */
-export function refineByTab(products, id) {
-  const tab = getTab(id);
-  if (!tab.match || !Array.isArray(products)) return products || [];
-  return products.filter(p => {
-    const haystack = `${p?.name || ''} ${p?.description || ''}`;
-    return tab.match.test(haystack);
-  });
+export function tabToCategoryId(id) {
+  return getTab(id).categoryId;
+}
+
+/**
+ * Back-compat alias. The function used to return a legacy backend slug
+ * (shoes/tops/bottoms/...); it now returns the new category_id which is
+ * what the filter pipeline keys off of. Same call sites, new semantics.
+ */
+export function tabToCategorySlug(id) {
+  return tabToCategoryId(id);
+}
+
+/**
+ * Tab -> category mapping is now exact (1:1), so no client-side regex
+ * refinement is needed. Kept as an identity pass-through so existing
+ * callers (ShopPage) don't have to change.
+ */
+export function refineByTab(products /*, _id */) {
+  return Array.isArray(products) ? products : [];
 }

@@ -1,24 +1,12 @@
 // src/utils/brandList.js
-// Curated brand list surfaced in the Shop sidebar. Each entry has a stable
-// `id` (slug-style) used as the selection key, plus the customer-facing
-// `label`. Filtering is client-side because the backend ?brand= query is
-// single-value but the sidebar checkboxes are multi-select.
+// BRAND section of the Shop sidebar. Brands are derived dynamically from
+// src/data/products.js so the sidebar only lists brands that actually
+// appear in the catalog - no zero-count rows, no stale curated list.
+//
+// Filtering remains client-side because the legacy backend ?brand= query
+// is single-value but the sidebar checkboxes are multi-select.
 
-export const BRAND_LIST = [
-  { id: 'nike',           label: 'NIKE' },
-  { id: 'levis',          label: "LEVI'S" },
-  { id: 'puma',           label: 'PUMA' },
-  { id: 'adidas',         label: 'ADIDAS' },
-  { id: 'tommy-hilfiger', label: 'TOMMY HILFIGER' },
-  { id: 'reebok',         label: 'REEBOK' },
-  { id: 'wrangler',       label: 'WRANGLER' },
-  { id: 'lacoste',        label: 'LACOSTE' },
-  { id: 'superdry',       label: 'SUPERDRY' },
-  { id: 'burberry',       label: 'BURBERRY' },
-  { id: 'rare-rabbit',    label: 'RARE RABBIT' },
-  { id: 'blackberrys',    label: 'BLACKBERRYS' },
-  { id: 'true-religion',  label: 'TRUE RELIGION' },
-];
+import PRODUCTS from '../data/products.js';
 
 /**
  * Normalize an arbitrary brand string to a slug for stable comparison.
@@ -33,6 +21,27 @@ export function slugifyBrand(s) {
     .replace(/^-+|-+$/g, '');
 }
 
+/**
+ * Build the brand list once, at module load. Each catalog brand becomes
+ * a single sidebar entry; brands are surfaced in alphabetical order so
+ * the rail stays predictable as the catalog grows.
+ */
+function buildBrandList() {
+  const seen = new Map();
+  for (const p of PRODUCTS) {
+    const raw = p?.brand;
+    if (!raw) continue;
+    const id = slugifyBrand(raw);
+    if (!id || seen.has(id)) continue;
+    seen.set(id, { id, label: String(raw).trim().toUpperCase() });
+  }
+  return Array.from(seen.values()).sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export const BRAND_LIST = Object.freeze(buildBrandList());
+
+const BRAND_IDS = new Set(BRAND_LIST.map(b => b.id));
+
 /** True if the product's brand matches the given brand id (slug). */
 export function matchesBrand(product, brandId) {
   if (!product || !brandId) return false;
@@ -41,7 +50,7 @@ export function matchesBrand(product, brandId) {
 
 /**
  * Filter products by selected brand ids (multi-select; OR within the set).
- * When no brands are selected, returns the input unchanged.
+ * Returns the input unchanged when no brands are selected.
  */
 export function filterByBrands(products, selectedIds) {
   const list = Array.isArray(products) ? products : [];
@@ -50,14 +59,18 @@ export function filterByBrands(products, selectedIds) {
   return list.filter(p => set.has(slugifyBrand(p?.brand)));
 }
 
-/** Per-brand counts (only counts brands that appear in BRAND_LIST). */
+/**
+ * Per-brand counts. Only brands that are present in the catalog at module
+ * load are tracked; unknown brands on adapted products are ignored
+ * (consistent with the previous curated-list behaviour).
+ */
 export function countByBrands(products) {
   const list = Array.isArray(products) ? products : [];
   const out = {};
   for (const b of BRAND_LIST) out[b.id] = 0;
   for (const p of list) {
     const id = slugifyBrand(p?.brand);
-    if (id in out) out[id]++;
+    if (id && BRAND_IDS.has(id)) out[id]++;
   }
   return out;
 }
