@@ -3,7 +3,7 @@
 // Monochrome luxury styling, animated active underline, horizontal scroll
 // on narrow viewports, fully keyboard accessible.
 
-import { CATEGORY_TABS } from '../utils/categoryTabs.js';
+import { CATEGORY_TABS } from '../../utils/categoryTabs.js';
 
 export default function CategoryTabs({
   value = 'all',

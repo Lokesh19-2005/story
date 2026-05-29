@@ -5,15 +5,16 @@
 // rail, sidebar filters, sort dropdown and search bar all keep working.
 import { useState, useCallback, useMemo } from 'react';
 import { useStaticProducts as useProducts } from '../hooks/useStaticProducts.js';
-import ProductCard from '../components/ProductCard.jsx';
-import LoadingScreen from '../components/LoadingScreen.jsx';
-import EmptyState from '../components/EmptyState.jsx';
-import Footer from '../components/Footer.jsx';
-import CategoryTabs from '../components/CategoryTabs.jsx';
-import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
-import SortDropdown from '../components/SortDropdown.jsx';
-import GridSwitcher from '../components/GridSwitcher.jsx';
-import MobileFilterDrawer from '../components/MobileFilterDrawer.jsx';
+import ProductCard from '../components/product/ProductCard.jsx';
+import LoadingScreen from '../components/feedback/LoadingScreen.jsx';
+import EmptyState from '../components/feedback/EmptyState.jsx';
+import Footer from '../components/layout/Footer.jsx';
+import CategoryTabs from '../components/shop/CategoryTabs.jsx';
+import CategoryFilterSidebar from '../components/shop/CategoryFilterSidebar.jsx';
+import SortDropdown from '../components/shop/SortDropdown.jsx';
+import GridSwitcher from '../components/shop/GridSwitcher.jsx';
+import MobileFilterDrawer from '../components/shop/MobileFilterDrawer.jsx';
+import { Stagger, FadeUpItem } from '../components/motion/Motion.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';
 import { filterByBrands, countByBrands } from '../utils/brandList.js';
@@ -156,56 +157,61 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
   return (
     <div>
       {/* Shop header */}
-      <div style={{ borderBottom: 'var(--bd)', padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', background: '#fff' }}>
-        <div style={{ fontFamily: 'var(--fm)', fontSize: '9px', letterSpacing: '.2em', color: '#888', fontWeight: 500 }}>
+      <div className="shop-header">
+        <div className="shop-header-count">
           {loading ? 'LOADING...' : `${safeProducts.length} PRODUCT${safeProducts.length !== 1 ? 'S' : ''}`}
         </div>
 
         {/* Search */}
-        <div style={{ display: 'flex', gap: 8, flex: 1, maxWidth: 400 }}>
+        <div className="shop-header-search">
           <input className="fi2" placeholder="Search products..."
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && doSearch()}
             style={{ flex: 1 }}
+            aria-label="Search products"
           />
-          <button className="btn btn-k" style={{ fontSize: '8px', padding: '10px 18px', whiteSpace: 'nowrap' }} onClick={doSearch}>
+          <button className="btn btn-k shop-header-search-btn" onClick={doSearch}>
             SEARCH
           </button>
           {search && (
-            <button className="btn btn-w" style={{ fontSize: '8px', padding: '10px 12px' }}
-              onClick={() => { setSearch(''); setSearchInput(''); }}>{'\u2715'}</button>
+            <button
+              className="btn btn-w shop-header-search-clear"
+              onClick={() => { setSearch(''); setSearchInput(''); }}
+              aria-label="Clear search"
+            >{'\u2715'}</button>
           )}
         </div>
 
-        {/* Sort */}
-        <SortDropdown value={sort} options={SORTS} onChange={setSort} />
+        <div className="shop-header-controls">
+          {/* Sort */}
+          <SortDropdown value={sort} options={SORTS} onChange={setSort} />
 
-        {/* Mobile-only filter trigger — desktop uses the always-visible sidebar */}
-        <button
-          type="button"
-          className="mobile-filter-btn"
-          onClick={() => setFilterDrawerOpen(true)}
-          aria-label="Open filters"
-        >
-          <svg width="14" height="11" viewBox="0 0 14 11" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-            <path d="M0 1.5h14M2 5.5h10M4 9.5h6" strokeLinecap="square" />
-          </svg>
-          FILTERS
-          {sidebarFilterCount > 0 && (
-            <span className="mobile-filter-btn-count">{sidebarFilterCount}</span>
-          )}
-        </button>
-
-        {/* Grid cols — hidden on mobile */}
-        <GridSwitcher cols={cols} onChange={setCols} className="col-switcher" />
-
-        {hasAnyFilter && (
-          <button onClick={clearAll}
-            style={{ padding:'8px 14px', border:'none', background:'none', color:'#888', fontFamily:'var(--fm)', fontSize:'8px', letterSpacing:'.15em', cursor:'pointer', textDecoration:'underline', fontWeight:600 }}>
-            CLEAR ALL
+          {/* Mobile-only filter trigger — desktop uses the always-visible sidebar */}
+          <button
+            type="button"
+            className="mobile-filter-btn"
+            onClick={() => setFilterDrawerOpen(true)}
+            aria-label="Open filters"
+          >
+            <svg width="14" height="11" viewBox="0 0 14 11" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+              <path d="M0 1.5h14M2 5.5h10M4 9.5h6" strokeLinecap="square" />
+            </svg>
+            FILTERS
+            {sidebarFilterCount > 0 && (
+              <span className="mobile-filter-btn-count">{sidebarFilterCount}</span>
+            )}
           </button>
-        )}
+
+          {/* Grid cols — hidden on mobile */}
+          <GridSwitcher cols={cols} onChange={setCols} className="col-switcher" />
+
+          {hasAnyFilter && (
+            <button onClick={clearAll} className="shop-header-clear">
+              CLEAR ALL
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Category tabs — primary axis */}
@@ -246,12 +252,20 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
               subtitle={search ? `No results for "${search}"` : 'Try a different filter'}
               action="CLEAR FILTERS" onAction={clearAll} />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0' }}>
+            <Stagger
+              key={`${tab}|${sort}|${search}|${cols}|${groupSel.size}|${brandSel.size}|${sizeSel.size}|${priceSel.size}`}
+              className={`products-grid cols-${cols}`}
+              stagger={0.05}
+              delay={0.02}
+              viewport={{ once: true, amount: 0.05 }}
+            >
               {safeProducts.map(p => (
-                <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
-                  onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
+                <FadeUpItem key={p.id} y={16}>
+                  <ProductCard product={p} onClick={() => openDetail(p.id)}
+                    onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
+                </FadeUpItem>
               ))}
-            </div>
+            </Stagger>
           )}
         </div>
       </div>
@@ -284,6 +298,78 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
       <Footer setPage={setPage} />
 
       <style>{`
+        .shop-header {
+          border-bottom: var(--bd);
+          padding: 18px 40px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
+          background: #fff;
+        }
+        .shop-header-count {
+          font-family: var(--fm);
+          font-size: 9px;
+          letter-spacing: .2em;
+          color: #888;
+          font-weight: 500;
+          flex-shrink: 0;
+        }
+        .shop-header-search {
+          display: flex;
+          gap: 8px;
+          flex: 1;
+          max-width: 400px;
+        }
+        .shop-header-search-btn {
+          font-size: 8px;
+          padding: 10px 18px;
+          white-space: nowrap;
+        }
+        .shop-header-search-clear {
+          font-size: 8px;
+          padding: 10px 12px;
+          flex-shrink: 0;
+        }
+        .shop-header-controls {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .shop-header-clear {
+          padding: 8px 14px;
+          border: none;
+          background: none;
+          color: #888;
+          font-family: var(--fm);
+          font-size: 8px;
+          letter-spacing: .15em;
+          cursor: pointer;
+          text-decoration: underline;
+          font-weight: 600;
+        }
+        .shop-header-clear:hover { color: #111; }
+
+        @media (max-width: 900px) {
+          .shop-header { padding: 16px 20px; gap: 12px; }
+          .shop-header-search { max-width: 100%; flex-basis: 100%; order: 2; }
+          .shop-header-controls { order: 3; flex-basis: 100%; justify-content: space-between; }
+        }
+        @media (max-width: 700px) {
+          .shop-header {
+            padding: 14px 16px;
+            gap: 10px;
+          }
+          .shop-header-count { flex-basis: 100%; order: 1; }
+          .shop-header-search-btn,
+          .shop-header-search-clear {
+            min-height: 44px;
+            padding: 10px 14px;
+          }
+        }
+
         @media (max-width: 640px) {
           .col-switcher { display: none !important; }
         }

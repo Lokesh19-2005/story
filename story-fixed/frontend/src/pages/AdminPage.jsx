@@ -1,8 +1,8 @@
 // src/pages/AdminPage.jsx — PHASE 6: Full Admin Dashboard
 import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, uploadProductImage } from '../services/api.js';
-import { fp } from '../utils.js';
-import LoadingScreen from '../components/LoadingScreen.jsx';
+import { fp } from '../utils/format.js';
+import LoadingScreen from '../components/feedback/LoadingScreen.jsx';
 
 const STATUS_OPTS = ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 const PAY_OPTS    = ['pending', 'awaiting', 'paid', 'failed', 'refunded'];

@@ -3,9 +3,10 @@
 // and smooth hover micro-interactions. The exported component signature is
 // unchanged so all existing callsites (ShopPage, HomePage, DetailPage related)
 // keep working.
-import { fp, pct } from '../utils.js';
+import { fp, pct } from '../../utils/format.js';
 import SmartImage from './SmartImage.jsx';
-import { getPrimaryImage, getHoverImage } from '../utils/productImages.js';
+import { getPrimaryImage, getHoverImage } from '../../utils/productImages.js';
+import { motion, useReducedMotion, LUX_EASE } from '../motion/Motion.jsx';
 
 // Heart glyph — outlined by default, filled when wished. Feather-style path
 // that reads cleanly at small sizes.
@@ -36,6 +37,8 @@ function CheckIcon() {
 }
 
 export default function ProductCard({ product, onClick, onQuickAdd, isWish, onToggleWish }) {
+  const reduce = useReducedMotion();
+
   const discount  = pct(product?.orig_price, product?.price);
   const primary   = getPrimaryImage(product, 600);
   const secondary = getHoverImage(product, 600);
@@ -50,7 +53,12 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
   const otherTag  = !isNew && tagUpper ? tagUpper : null;
 
   return (
-    <div className="pc" onClick={onClick}>
+    <motion.div
+      className="pc"
+      onClick={onClick}
+      whileHover={reduce ? undefined : { y: -3 }}
+      transition={{ duration: 0.4, ease: LUX_EASE }}
+    >
       <div className="pc-img">
         <SmartImage
           src={primary}
@@ -117,6 +125,6 @@ export default function ProductCard({ product, onClick, onQuickAdd, isWish, onTo
           QUICK ADD
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

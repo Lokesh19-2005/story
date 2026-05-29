@@ -1,5 +1,5 @@
 // src/pages/ConfirmPage.jsx — PHASE 5: Order Success
-import { fp } from '../utils.js';
+import { fp } from '../utils/format.js';
 
 export default function ConfirmPage({ order, setPage }) {
   if (!order) return null;
@@ -47,18 +47,18 @@ export default function ConfirmPage({ order, setPage }) {
         </div>
 
         {/* Order timeline */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 32 }}>
+        <div className="confirm-timeline" style={{ display: 'flex', gap: 4, marginBottom: 32 }}>
           {['ORDER PLACED', 'CONFIRMED', 'SHIPPED', 'DELIVERED'].map((s, i) => (
             <div key={s} style={{ flex: 1 }}>
               <div style={{ height: 3, background: i === 0 ? '#111' : '#e5e2d9', marginBottom: 6, borderRadius: 2 }} />
-              <div style={{ fontFamily: 'var(--fm)', fontSize: '6px', letterSpacing: '.08em', color: i === 0 ? '#111' : 'var(--warm)', textAlign: 'center' }}>{s}</div>
+              <div className="confirm-timeline-label" style={{ fontFamily: 'var(--fm)', fontSize: '6.5px', letterSpacing: '.08em', color: i === 0 ? '#111' : 'var(--warm)', textAlign: 'center', textTransform: 'uppercase' }}>{s}</div>
             </div>
           ))}
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <button className="btn btn-k" onClick={() => setPage('orders')}>VIEW MY ORDERS →</button>
+        <div className="confirm-actions">
+          <button className="btn btn-k" onClick={() => setPage('orders')}>{'VIEW MY ORDERS \u2192'}</button>
           <button className="btn btn-w" onClick={() => setPage('shop')}>CONTINUE SHOPPING</button>
         </div>
       </div>

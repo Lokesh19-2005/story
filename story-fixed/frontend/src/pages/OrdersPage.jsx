@@ -1,9 +1,9 @@
 // src/pages/OrdersPage.jsx — Order History with Cancel Flow
 import { useState, useEffect } from 'react';
 import { ordersAPI } from '../services/api.js';
-import { fp } from '../utils.js';
-import EmptyState from '../components/EmptyState.jsx';
-import LoadingScreen from '../components/LoadingScreen.jsx';
+import { fp } from '../utils/format.js';
+import EmptyState from '../components/feedback/EmptyState.jsx';
+import LoadingScreen from '../components/feedback/LoadingScreen.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const STATUS_COLORS = {

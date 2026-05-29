@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { addressAPI, returnsAPI, ordersAPI } from '../services/api.js';
-import { fp } from '../utils.js';
+import { fp } from '../utils/format.js';
 
 export default function ProfilePage({ setPage, user }) {
   const { updateProfile, changePassword, logout } = useAuth();

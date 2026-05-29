@@ -1,4 +1,4 @@
-// src/App.jsx — STORY™ Full Stack App
+// src/App.jsx — STORY (TM) Full Stack App
 //
 // While the storefront runs in backend-less demo mode, three frontend
 // contracts are swapped for static-data drop-ins:
@@ -8,30 +8,49 @@
 // Each of these aliases preserves the original hook/component contract,
 // so every page, drawer, and component keeps working unchanged. To flip
 // back to the live backend, restore the original imports below.
-import { useState, useEffect } from 'react';
+//
+// Routes are CODE-SPLIT via React.lazy so the home page ships in the
+// initial bundle while heavier surfaces (PDP, checkout, admin, profile,
+// etc.) load on demand. AdminPage is the largest and benefits the most.
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './context/AuthContext.jsx';
 import { StaticAuthProvider as AuthProvider } from './context/StaticAuthProvider.jsx';
 import { useStaticStore as useStore } from './hooks/useStaticStore.js';
 import { useStaticProducts as useProducts } from './hooks/useStaticProducts.js';
-import { ToastProvider, useToast } from './components/Toast.jsx';
-import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { ToastProvider, useToast } from './components/feedback/Toast.jsx';
+import ErrorBoundary from './components/feedback/ErrorBoundary.jsx';
+import { PageTransition } from './components/motion/Motion.jsx';
 
-import BrandTicker   from './components/BrandTicker.jsx';
-import Navbar        from './components/Navbar.jsx';
-import CartDrawer    from './components/CartDrawer.jsx';
-import LoadingScreen from './components/LoadingScreen.jsx';
+import BrandTicker   from './components/layout/BrandTicker.jsx';
+import Navbar        from './components/layout/Navbar.jsx';
+import CartDrawer    from './components/layout/CartDrawer.jsx';
+import LoadingScreen from './components/feedback/LoadingScreen.jsx';
 
-import HomePage    from './pages/HomePage.jsx';
-import AboutPage   from './pages/AboutPage.jsx';
-import ShopPage    from './pages/ShopPage.jsx';
-import DetailPage  from './pages/DetailPage.jsx';
-import CartPage    from './pages/CartPage.jsx';
-import CheckoutPage from './pages/CheckoutPage.jsx';
-import ConfirmPage  from './pages/ConfirmPage.jsx';
-import AuthPage     from './pages/AuthPage.jsx';
-import OrdersPage   from './pages/OrdersPage.jsx';
-import ProfilePage  from './pages/ProfilePage.jsx';
-import AdminPage    from './pages/AdminPage.jsx';
+// HomePage stays eagerly imported so the first paint is instant. Every
+// other route is split into its own chunk and lazy-loaded on first use.
+import HomePage from './pages/HomePage.jsx';
+
+const AboutPage    = lazy(() => import('./pages/AboutPage.jsx'));
+const ShopPage     = lazy(() => import('./pages/ShopPage.jsx'));
+const DetailPage   = lazy(() => import('./pages/DetailPage.jsx'));
+const CartPage     = lazy(() => import('./pages/CartPage.jsx'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage.jsx'));
+const ConfirmPage  = lazy(() => import('./pages/ConfirmPage.jsx'));
+const AuthPage     = lazy(() => import('./pages/AuthPage.jsx'));
+const OrdersPage   = lazy(() => import('./pages/OrdersPage.jsx'));
+const ProfilePage  = lazy(() => import('./pages/ProfilePage.jsx'));
+const AdminPage    = lazy(() => import('./pages/AdminPage.jsx'));
+
+// Tiny wrapper that pairs every routed page with its <PageTransition>
+// cross-fade and a shared <Suspense> fallback. Centralising this here
+// keeps the route table below readable and consistent.
+function Route({ keyId, children }) {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <PageTransition keyId={keyId}>{children}</PageTransition>
+    </Suspense>
+  );
+}
 
 function AppInner() {
   const [page, setPageRaw]              = useState('home');
@@ -44,7 +63,7 @@ function AppInner() {
 
   const { user, isLoggedIn, logout, loading: authLoading } = useAuth();
   const toast = useToast();
-  const { cart, wish, cTotal, cCount, addCart, remCart, chQty, togWish, isWish, clearCart, reloadAfterLogin } = useStore(toast);
+  const { cart, cTotal, cCount, addCart, remCart, chQty, togWish, isWish, clearCart, reloadAfterLogin } = useStore(toast);
   const { products } = useProducts({ limit: 50 });
 
   useEffect(() => {
@@ -80,7 +99,7 @@ function AppInner() {
   const handlePlaceOrder = (order) => {
     setConfirmedOrder(order);
     clearCart();
-    toast('Order placed successfully! 🎉', 'success');
+    toast('Order placed successfully', 'success');
     setPage('confirm');
   };
 
@@ -116,25 +135,38 @@ function AppInner() {
         toast={toast}
       />
 
-      {page === 'home'     && <HomePage {...commonProps} />}
-      {page === 'about'    && <AboutPage setPage={setPage} />}
-      {page === 'shop'     && <ShopPage  {...commonProps} />}
+      {/* Home route — eagerly loaded, no Suspense needed */}
+      {page === 'home' && (
+        <PageTransition keyId="home">
+          <HomePage {...commonProps} />
+        </PageTransition>
+      )}
+
+      {/* All other routes are code-split */}
+      {page === 'about'    && <Route keyId="about"><AboutPage setPage={setPage} /></Route>}
+      {page === 'shop'     && <Route keyId="shop"><ShopPage {...commonProps} /></Route>}
       {page === 'detail'   && curProductId && (
-        <DetailPage productId={curProductId} addCart={addCart} openDrawer={() => setDrawerOpen(true)} {...commonProps} />
+        <Route keyId={`detail-${curProductId}`}>
+          <DetailPage productId={curProductId} addCart={addCart} openDrawer={() => setDrawerOpen(true)} {...commonProps} />
+        </Route>
       )}
       {page === 'detail'   && !curProductId && (
-        <div style={{ textAlign:'center', padding:'120px 20px' }}>
-          <div style={{ fontFamily:'var(--fm)', fontSize:'11px', letterSpacing:'.2em', marginBottom:24 }}>PRODUCT NOT FOUND</div>
-          <button className="btn btn-k" onClick={() => setPage('shop')}>← BACK TO SHOP</button>
-        </div>
+        <Route keyId="detail-empty">
+          <div style={{ textAlign: 'center', padding: 'var(--sp-7) var(--sp-3)' }}>
+            <div style={{ fontFamily: 'var(--fm)', fontSize: 'var(--fz-2)', letterSpacing: '.2em', marginBottom: 'var(--sp-4)' }}>
+              PRODUCT NOT FOUND
+            </div>
+            <button className="btn btn-k" onClick={() => setPage('shop')}>{'\u2190 BACK TO SHOP'}</button>
+          </div>
+        </Route>
       )}
-      {page === 'cart'     && <CartPage cart={cart} chQty={chQty} remCart={remCart} setPage={setPage} cTotal={cTotal} toast={toast} />}
-      {page === 'checkout' && <CheckoutPage cart={cart} cTotal={cTotal} setPage={setPage} clearCart={clearCart} onPlaceOrder={handlePlaceOrder} toast={toast} />}
-      {page === 'confirm'  && <ConfirmPage order={confirmedOrder} setPage={setPage} />}
-      {page === 'auth'     && <AuthPage setPage={setPage} reloadAfterLogin={reloadAfterLogin} initialMode={authMode} initialToken={resetToken} toast={toast} />}
-      {page === 'orders'   && <OrdersPage setPage={setPage} initialOrderId={viewOrderId} toast={toast} />}
-      {page === 'profile'  && <ProfilePage setPage={setPage} user={user} />}
-      {page === 'admin'    && <AdminPage setPage={setPage} />}
+      {page === 'cart'     && <Route keyId="cart"><CartPage cart={cart} chQty={chQty} remCart={remCart} setPage={setPage} cTotal={cTotal} toast={toast} /></Route>}
+      {page === 'checkout' && <Route keyId="checkout"><CheckoutPage cart={cart} cTotal={cTotal} setPage={setPage} clearCart={clearCart} onPlaceOrder={handlePlaceOrder} toast={toast} /></Route>}
+      {page === 'confirm'  && <Route keyId="confirm"><ConfirmPage order={confirmedOrder} setPage={setPage} /></Route>}
+      {page === 'auth'     && <Route keyId="auth"><AuthPage setPage={setPage} reloadAfterLogin={reloadAfterLogin} initialMode={authMode} initialToken={resetToken} toast={toast} /></Route>}
+      {page === 'orders'   && <Route keyId="orders"><OrdersPage setPage={setPage} initialOrderId={viewOrderId} toast={toast} /></Route>}
+      {page === 'profile'  && <Route keyId="profile"><ProfilePage setPage={setPage} user={user} /></Route>}
+      {page === 'admin'    && <Route keyId="admin"><AdminPage setPage={setPage} /></Route>}
     </>
   );
 }
