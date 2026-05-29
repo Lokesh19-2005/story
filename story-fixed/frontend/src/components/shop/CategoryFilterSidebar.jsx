@@ -5,10 +5,10 @@
 // presentation variants: 'list' for text rows, 'grid' for compact chips).
 
 import { useState } from 'react';
-import { CATEGORY_GROUPS } from '../utils/categoryGroups.js';
-import { BRAND_LIST } from '../utils/brandList.js';
-import { SIZE_LIST } from '../utils/sizeList.js';
-import { PRICE_RANGES } from '../utils/priceRanges.js';
+import { CATEGORY_GROUPS } from '../../utils/categoryGroups.js';
+import { BRAND_LIST } from '../../utils/brandList.js';
+import { SIZE_LIST } from '../../utils/sizeList.js';
+import { PRICE_RANGES } from '../../utils/priceRanges.js';
 
 function ChevronIcon() {
   return (

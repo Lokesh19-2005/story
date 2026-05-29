@@ -34,8 +34,8 @@
 import { useMemo, useState } from 'react';
 import PRODUCTS from '../data/products.js';
 import { adaptProducts } from '../data/adapter.js';
-import ProductCard from '../components/ProductCard.jsx';
-import Footer from '../components/Footer.jsx';
+import ProductCard from '../components/product/ProductCard.jsx';
+import Footer from '../components/layout/Footer.jsx';
 import {
   FadeUp,
   RevealText,

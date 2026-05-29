@@ -3,10 +3,10 @@
 // and smooth hover micro-interactions. The exported component signature is
 // unchanged so all existing callsites (ShopPage, HomePage, DetailPage related)
 // keep working.
-import { fp, pct } from '../utils.js';
+import { fp, pct } from '../../utils/format.js';
 import SmartImage from './SmartImage.jsx';
-import { getPrimaryImage, getHoverImage } from '../utils/productImages.js';
-import { motion, useReducedMotion, LUX_EASE } from './motion/Motion.jsx';
+import { getPrimaryImage, getHoverImage } from '../../utils/productImages.js';
+import { motion, useReducedMotion, LUX_EASE } from '../motion/Motion.jsx';
 
 // Heart glyph — outlined by default, filled when wished. Feather-style path
 // that reads cleanly at small sizes.

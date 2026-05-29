@@ -4,7 +4,7 @@
 // .about-* utility classes in global.css, which apply fluid clamp()
 // scaling so every section breathes correctly from desktop down to
 // small phones without a single page-scoped media query.
-import Footer from '../components/Footer.jsx';
+import Footer from '../components/layout/Footer.jsx';
 
 export default function AboutPage({ setPage }) {
   return (

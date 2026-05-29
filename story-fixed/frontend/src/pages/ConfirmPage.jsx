@@ -1,5 +1,5 @@
 // src/pages/ConfirmPage.jsx — PHASE 5: Order Success
-import { fp } from '../utils.js';
+import { fp } from '../utils/format.js';
 
 export default function ConfirmPage({ order, setPage }) {
   if (!order) return null;

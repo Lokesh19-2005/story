@@ -1,19 +1,77 @@
-/* ── STORY™ Design System — Black & White Edition ─────────────── */
+/* ===========================================================================
+   STORY (TM) Design System — Black & White Edition
+   ---------------------------------------------------------------------------
+   Single source of truth for tokens used across the storefront. Every
+   page-scoped <style> block in pages/*.jsx and components/*.jsx pulls
+   from these tokens so the brand stays consistent and adjustments are
+   one-line changes.
+
+   Tokens are grouped:
+     1. Fonts          (--fm, --fs, --fg)
+     2. Color palette  (--white .. --ink)
+     3. Surface tokens (--bd, --shadow)
+     4. Type scale     (--fz-1 .. --fz-7)
+     5. Spacing scale  (--sp-0 .. --sp-9)  - 4px base, geometric
+     6. Layout scale   (--container, --container-sm, --gutter)
+     7. Motion         (--ease, --dur-1 .. --dur-3)
+   =========================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@200;300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
 
 :root {
-  --fm: 'Montserrat', sans-serif;
-  --fs: 'Bebas Neue', sans-serif;
-  --fg: 'Cormorant Garamond', serif;
+  /* 1. Fonts */
+  --fm: 'Montserrat', sans-serif;       /* UI sans */
+  --fs: 'Bebas Neue', sans-serif;       /* Editorial display */
+  --fg: 'Cormorant Garamond', serif;    /* Italic accents */
+
+  /* 2. Color palette - strict monochrome */
   --white: #ffffff;
   --cream: #f7f7f5;
-  --off: #efefed;
-  --warm: #888;
-  --ink: #111111;
-  --bd: 1px solid #e0e0e0;
-  --bdh: 1px solid #999;
-  --r: 0px;
-  --shadow: 0 8px 40px rgba(0,0,0,.10);
+  --off:   #efefed;
+  --line:  #e0e0e0;
+  --warm:  #888888;
+  --slate: #555555;
+  --ink:   #111111;
+  --black: #0a0a0a;
+
+  /* 3. Surface tokens */
+  --bd:     1px solid var(--line);
+  --bdh:    1px solid #999999;
+  --r:      0px;
+  --shadow: 0 8px 40px rgba(0, 0, 0, .10);
+
+  /* 4. Type scale - small UI sizes are intentional (luxury convention) */
+  --fz-0: 7.5px;   /* eyebrow */
+  --fz-1: 8.5px;   /* small UI label */
+  --fz-2: 11px;    /* body small */
+  --fz-3: 13px;    /* body */
+  --fz-4: 16px;    /* lead */
+  --fz-5: 20px;    /* small display */
+  --fz-6: 28px;    /* mid display */
+  --fz-7: 40px;    /* large display */
+
+  /* 5. Spacing scale - 4px base, doubles to 96px */
+  --sp-0: 4px;
+  --sp-1: 8px;
+  --sp-2: 12px;
+  --sp-3: 16px;
+  --sp-4: 24px;
+  --sp-5: 32px;
+  --sp-6: 48px;
+  --sp-7: 64px;
+  --sp-8: 80px;
+  --sp-9: 96px;
+
+  /* 6. Layout scale */
+  --container:    1440px;
+  --container-md: 1280px;
+  --container-sm: 1100px;
+  --gutter:       clamp(16px, 4vw, 40px);
+
+  /* 7. Motion - matches the framer-motion LUX_EASE */
+  --ease:  cubic-bezier(.2, .7, .2, 1);
+  --dur-1: .15s;
+  --dur-2: .25s;
+  --dur-3: .45s;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

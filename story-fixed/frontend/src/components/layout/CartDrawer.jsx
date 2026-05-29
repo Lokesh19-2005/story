@@ -7,7 +7,7 @@
 //   - Item rows use slightly larger thumbs and clearer typography on
 //     small screens via a single .cart-drawer-* class set, while the
 //     desktop layout stays exactly as before.
-import { fp } from '../utils.js';
+import { fp } from '../../utils/format.js';
 
 export default function CartDrawer({ open, onClose, cart, chQty, remCart, setPage }) {
   return (

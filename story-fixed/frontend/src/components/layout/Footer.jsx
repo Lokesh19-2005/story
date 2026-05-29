@@ -10,7 +10,7 @@
 //     the global .btn / .fi2 mobile rules, so they remain tappable.
 //   - Editorial spacing is preserved at every breakpoint via clamp().
 import { useState } from 'react';
-import { newsletterAPI } from '../services/api.js';
+import { newsletterAPI } from '../../services/api.js';
 
 export default function Footer({ setPage }) {
   const [email, setEmail] = useState('');

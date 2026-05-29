@@ -5,15 +5,15 @@
 // rail, sidebar filters, sort dropdown and search bar all keep working.
 import { useState, useCallback, useMemo } from 'react';
 import { useStaticProducts as useProducts } from '../hooks/useStaticProducts.js';
-import ProductCard from '../components/ProductCard.jsx';
-import LoadingScreen from '../components/LoadingScreen.jsx';
-import EmptyState from '../components/EmptyState.jsx';
-import Footer from '../components/Footer.jsx';
-import CategoryTabs from '../components/CategoryTabs.jsx';
-import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
-import SortDropdown from '../components/SortDropdown.jsx';
-import GridSwitcher from '../components/GridSwitcher.jsx';
-import MobileFilterDrawer from '../components/MobileFilterDrawer.jsx';
+import ProductCard from '../components/product/ProductCard.jsx';
+import LoadingScreen from '../components/feedback/LoadingScreen.jsx';
+import EmptyState from '../components/feedback/EmptyState.jsx';
+import Footer from '../components/layout/Footer.jsx';
+import CategoryTabs from '../components/shop/CategoryTabs.jsx';
+import CategoryFilterSidebar from '../components/shop/CategoryFilterSidebar.jsx';
+import SortDropdown from '../components/shop/SortDropdown.jsx';
+import GridSwitcher from '../components/shop/GridSwitcher.jsx';
+import MobileFilterDrawer from '../components/shop/MobileFilterDrawer.jsx';
 import { Stagger, FadeUpItem } from '../components/motion/Motion.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';

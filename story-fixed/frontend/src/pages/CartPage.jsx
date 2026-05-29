@@ -1,6 +1,6 @@
 // src/pages/CartPage.jsx
-import { fp } from '../utils.js';
-import EmptyState from '../components/EmptyState.jsx';
+import { fp } from '../utils/format.js';
+import EmptyState from '../components/feedback/EmptyState.jsx';
 
 export default function CartPage({ cart, chQty, remCart, setPage, cTotal }) {
   if (cart.length === 0) return (

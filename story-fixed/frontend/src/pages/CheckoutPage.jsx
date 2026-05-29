@@ -1,9 +1,9 @@
 // src/pages/CheckoutPage.jsx — FIXED: typing bug + robust Razorpay
 import { useState } from 'react';
 import { ordersAPI, couponAPI, paymentAPI } from '../services/api.js';
-import { fp } from '../utils.js';
+import { fp } from '../utils/format.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import EmptyState from '../components/EmptyState.jsx';
+import EmptyState from '../components/feedback/EmptyState.jsx';
 
 const GST_RATE = 0.18;
 const SHIPPING = { standard: 99, express: 199, sameday: 299 };

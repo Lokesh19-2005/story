@@ -20,10 +20,10 @@
 // upgrade fully scoped to this page. No global.css changes required.
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fp, pct } from '../utils.js';
-import LoadingScreen from '../components/LoadingScreen.jsx';
-import ProductCard from '../components/ProductCard.jsx';
-import SmartImage from '../components/SmartImage.jsx';
+import { fp, pct } from '../utils/format.js';
+import LoadingScreen from '../components/feedback/LoadingScreen.jsx';
+import ProductCard from '../components/product/ProductCard.jsx';
+import SmartImage from '../components/product/SmartImage.jsx';
 import { getProductImages } from '../utils/productImages.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import PRODUCTS from '../data/products.js';
