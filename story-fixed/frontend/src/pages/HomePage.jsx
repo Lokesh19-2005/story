@@ -31,11 +31,22 @@
 //    - Backend, APIs, auth, cart, inventory, navbar  (untouched)
 // =============================================================================
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import PRODUCTS from '../data/products.js';
 import { adaptProducts } from '../data/adapter.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Footer from '../components/Footer.jsx';
+import {
+  FadeUp,
+  RevealText,
+  RevealImage,
+  HoverLift,
+  Stagger,
+  FadeUpItem,
+  motion,
+  useReducedMotion,
+  LUX_EASE,
+} from '../components/motion/Motion.jsx';
 
 // ----------------------------------------------------------------------------
 //  Module-scope adapted catalog. Adapted once at load so all editorial
@@ -147,67 +158,105 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
   const recommendHero  = findBySlug(RECOMMEND_HERO_SLUG) || ADAPTED[0];
   const recommendItems = pick(RECOMMEND_SLUGS);
 
-  // Scroll-triggered reveal. Tasteful 0.8s opacity + translate.
-  // Honours prefers-reduced-motion via CSS, falls back to "always visible"
-  // if IntersectionObserver is missing.
-  useEffect(() => {
-    const els = document.querySelectorAll('.hp-reveal');
-    if (typeof IntersectionObserver === 'undefined' || !els.length) {
-      els.forEach(el => el.classList.add('hp-revealed'));
-      return;
-    }
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) {
-          e.target.classList.add('hp-revealed');
-          io.unobserve(e.target);
-        }
-      }
-    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-    els.forEach(el => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+  const reduceMotion = useReducedMotion();
 
   return (
     <div className="hp">
       {/* ── 1. HERO ─────────────────────────────────────────────────────
            Fullscreen editorial: oversized SERIF/DISPLAY headline centered,
            with three layered fashion images peeking through. Minimal CTA.
-           Smooth reveal animation on mount. */}
+           Smooth Framer Motion reveals (curtain wipe + fade-up) on mount. */}
       <section className="hp-hero" aria-label="STORY — SS 2025">
         {/* Layered fashion imagery — three offset frames behind the type */}
         <div className="hp-hero-stage" aria-hidden="true">
-          <div className="hp-hero-img hp-hero-img-l">
+          <RevealImage
+            className="hp-hero-img hp-hero-img-l"
+            duration={1.1}
+            delay={0.15}
+            curtain="#fff"
+          >
             {HERO_IMAGES[0] && <img src={HERO_IMAGES[0]} alt="" draggable={false} />}
-          </div>
-          <div className="hp-hero-img hp-hero-img-c">
+          </RevealImage>
+          <RevealImage
+            className="hp-hero-img hp-hero-img-c"
+            duration={1.15}
+            delay={0.25}
+            curtain="#fff"
+          >
             {HERO_IMAGES[1] && <img src={HERO_IMAGES[1]} alt="" draggable={false} />}
-          </div>
-          <div className="hp-hero-img hp-hero-img-r">
+          </RevealImage>
+          <RevealImage
+            className="hp-hero-img hp-hero-img-r"
+            duration={1.1}
+            delay={0.35}
+            curtain="#fff"
+          >
             {HERO_IMAGES[2] && <img src={HERO_IMAGES[2]} alt="" draggable={false} />}
-          </div>
+          </RevealImage>
         </div>
 
         {/* Editorial copy — centered, oversized, layered above imagery */}
         <div className="hp-hero-content">
-          <div className="hp-hero-meta">
+          <motion.div
+            className="hp-hero-meta"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            transition={reduceMotion
+              ? { duration: 0.01 }
+              : { duration: 0.7, ease: LUX_EASE, delay: 0.1 }}
+          >
             <span>SPRING / SUMMER 2025</span>
             <span className="hp-hero-meta-rule" aria-hidden="true" />
             <span>{'VOLUME N\u00B0 04'}</span>
-          </div>
+          </motion.div>
 
           <h1 className="hp-hero-title">
-            <span className="hp-hero-line hp-hero-line-1">A QUIET</span>
-            <span className="hp-hero-line hp-hero-line-2">REVOLUTION</span>
-            <span className="hp-hero-line hp-hero-line-3">IN DRESS.</span>
+            <RevealText
+              as="span"
+              className="hp-hero-line hp-hero-line-1"
+              delay={0.25}
+              duration={0.85}
+            >
+              A QUIET
+            </RevealText>
+            <RevealText
+              as="span"
+              className="hp-hero-line hp-hero-line-2"
+              delay={0.4}
+              duration={0.9}
+            >
+              REVOLUTION
+            </RevealText>
+            <RevealText
+              as="span"
+              className="hp-hero-line hp-hero-line-3"
+              delay={0.55}
+              duration={0.85}
+            >
+              IN DRESS.
+            </RevealText>
           </h1>
 
-          <p className="hp-hero-lede">
+          <motion.p
+            className="hp-hero-lede"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            transition={reduceMotion
+              ? { duration: 0.01 }
+              : { duration: 0.8, ease: LUX_EASE, delay: 0.7 }}
+          >
             Considered silhouettes, atelier finishing, and a monochrome
             wardrobe built to outlast the season.
-          </p>
+          </motion.p>
 
-          <div className="hp-hero-cta">
+          <motion.div
+            className="hp-hero-cta"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
+            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            transition={reduceMotion
+              ? { duration: 0.01 }
+              : { duration: 0.8, ease: LUX_EASE, delay: 0.85 }}
+          >
             <button
               type="button"
               className="hp-btn hp-btn-solid"
@@ -222,57 +271,79 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
             >
               READ THE STORY
             </button>
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom marquee — small editorial caption + scroll cue */}
-        <div className="hp-hero-foot" aria-hidden="true">
+        <motion.div
+          className="hp-hero-foot"
+          aria-hidden="true"
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+          animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          transition={reduceMotion
+            ? { duration: 0.01 }
+            : { duration: 0.8, ease: LUX_EASE, delay: 1.05 }}
+        >
           <span>{'STORY\u2122 \u2014 THE EQUALITY BRAND'}</span>
           <span className="hp-hero-foot-sep" />
           <span>SCROLL</span>
-        </div>
+        </motion.div>
       </section>
 
       {/* ── 2. CATEGORIES ───────────────────────────────────────────────
            Centered tabs styled as minimal bordered buttons. Hover/active
            inverts to solid black. Spacious editorial padding. */}
-      <section className="hp-cats hp-reveal" aria-label="Shop by category">
+      <FadeUp as="section" className="hp-cats" aria-label="Shop by category">
         <header className="hp-cats-head">
           <div className="hp-eyebrow">THE COLLECTION</div>
-          <h2 className="hp-section-title">SHOP BY CATEGORY</h2>
+          <h2 className="hp-section-title">
+            <RevealText delay={0.05}>SHOP BY CATEGORY</RevealText>
+          </h2>
           <p className="hp-section-sub">
             Four edits, hand-selected for the season.
           </p>
         </header>
 
-        <div className="hp-cats-rail" role="tablist" aria-label="Category filter">
+        <Stagger
+          className="hp-cats-rail"
+          stagger={0.07}
+          delay={0.1}
+          role="tablist"
+          aria-label="Category filter"
+        >
           {CATEGORIES.map(cat => {
             const isActive = cat.id === activeCat;
             return (
-              <button
-                key={cat.id}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                className={`hp-cat-btn${isActive ? ' is-active' : ''}`}
-                onClick={() => setActiveCat(cat.id)}
-              >
-                <span className="hp-cat-label">{cat.label}</span>
-                <span className="hp-cat-sub">{cat.sub}</span>
-              </button>
+              <FadeUpItem key={cat.id} y={14}>
+                <motion.button
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  className={`hp-cat-btn${isActive ? ' is-active' : ''}`}
+                  onClick={() => setActiveCat(cat.id)}
+                  whileHover={reduceMotion ? undefined : { y: -2 }}
+                  whileTap={reduceMotion ? undefined : { y: 0 }}
+                  transition={{ duration: 0.3, ease: LUX_EASE }}
+                >
+                  <span className="hp-cat-label">{cat.label}</span>
+                  <span className="hp-cat-sub">{cat.sub}</span>
+                </motion.button>
+              </FadeUpItem>
             );
           })}
-        </div>
-      </section>
+        </Stagger>
+      </FadeUp>
 
       {/* ── 3. FEATURED PRODUCTS ────────────────────────────────────────
            Editorial 4-up grid. Cards keep the existing ProductCard
            contract; we just give them generous breathing room. */}
-      <section className="hp-featured hp-reveal" aria-label="Featured products">
+      <FadeUp as="section" className="hp-featured" aria-label="Featured products">
         <header className="hp-featured-head">
           <div>
             <div className="hp-eyebrow">SELECTED PIECES</div>
-            <h2 className="hp-section-title">FEATURED</h2>
+            <h2 className="hp-section-title">
+              <RevealText delay={0.05}>FEATURED</RevealText>
+            </h2>
           </div>
           <button
             type="button"
@@ -284,27 +355,33 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         </header>
 
         {featured.length > 0 ? (
-          <div className="hp-grid-4" key={activeCat}>
+          <Stagger
+            key={activeCat}
+            className="hp-grid-4"
+            stagger={0.06}
+            delay={0.05}
+          >
             {featured.map(p => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                onClick={() => openDetail(p.id)}
-                onQuickAdd={() => quickAdd(p.id)}
-                isWish={isWish(p.id)}
-                onToggleWish={togWish}
-              />
+              <FadeUpItem key={p.id} y={20}>
+                <ProductCard
+                  product={p}
+                  onClick={() => openDetail(p.id)}
+                  onQuickAdd={() => quickAdd(p.id)}
+                  isWish={isWish(p.id)}
+                  onToggleWish={togWish}
+                />
+              </FadeUpItem>
             ))}
-          </div>
+          </Stagger>
         ) : (
           <div className="hp-empty">No pieces in this edit yet.</div>
         )}
-      </section>
+      </FadeUp>
 
       {/* ── 4. PROMOTIONAL EDITORIAL ────────────────────────────────────
            Campaign-style split: oversized type left, fashion image right.
            Black background — high-contrast luxury banner. */}
-      <section className="hp-editorial hp-reveal" aria-label="Editorial campaign">
+      <FadeUp as="section" className="hp-editorial" aria-label="Editorial campaign">
         <div className="hp-editorial-copy">
           <div className="hp-editorial-meta">
             <span className="hp-editorial-rule" aria-hidden="true" />
@@ -312,28 +389,35 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           </div>
 
           <h2 className="hp-editorial-title">
-            <span className="hp-ed-line">DRESSED</span>
-            <span className="hp-ed-line hp-ed-italic">in</span>
-            <span className="hp-ed-line">SHADOW.</span>
+            <RevealText as="span" className="hp-ed-line" delay={0.1}>DRESSED</RevealText>
+            <RevealText as="span" className="hp-ed-line hp-ed-italic" delay={0.22}>in</RevealText>
+            <RevealText as="span" className="hp-ed-line" delay={0.34}>SHADOW.</RevealText>
           </h2>
 
-          <p className="hp-editorial-lede">
+          <FadeUp as="p" className="hp-editorial-lede" delay={0.45} y={14}>
             A study in restraint. Tailoring rendered in deep ink, knits
             built for stillness, leather worn close to the bone. STORY's
             seasonal campaign frames every piece against negative space {'\u2014'}
             the way it deserves to be seen.
-          </p>
+          </FadeUp>
 
-          <button
-            type="button"
-            className="hp-btn hp-btn-outline-light"
-            onClick={() => setPage('shop')}
-          >
-            EXPLORE THE CAMPAIGN
-          </button>
+          <FadeUp delay={0.55} y={14}>
+            <button
+              type="button"
+              className="hp-btn hp-btn-outline-light"
+              onClick={() => setPage('shop')}
+            >
+              EXPLORE THE CAMPAIGN
+            </button>
+          </FadeUp>
         </div>
 
-        <div className="hp-editorial-img" aria-hidden="true">
+        <RevealImage
+          className="hp-editorial-img"
+          duration={1.2}
+          delay={0.05}
+          curtain="#0a0a0a"
+        >
           {EDITORIAL_IMAGE && (
             <img src={EDITORIAL_IMAGE} alt="" draggable={false} />
           )}
@@ -343,16 +427,18 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
             <span>{'\u2014'}</span>
             <span>STORY ATELIER</span>
           </div>
-        </div>
-      </section>
+        </RevealImage>
+      </FadeUp>
 
       {/* ── 5. RECOMMENDATIONS ──────────────────────────────────────────
            Asymmetric luxury showcase. One full-bleed hero product on the
            left, three stacked pieces on the right. Spacious arrangement. */}
-      <section className="hp-recs hp-reveal" aria-label="Recommended for you">
+      <FadeUp as="section" className="hp-recs" aria-label="Recommended for you">
         <header className="hp-recs-head">
           <div className="hp-eyebrow">CURATED FOR YOU</div>
-          <h2 className="hp-section-title">RECOMMENDED</h2>
+          <h2 className="hp-section-title">
+            <RevealText delay={0.05}>RECOMMENDED</RevealText>
+          </h2>
           <p className="hp-section-sub">
             Pieces our editors are returning to this season.
           </p>
@@ -361,57 +447,69 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         <div className="hp-recs-grid">
           {/* Hero piece — large editorial card */}
           {recommendHero && (
-            <button
-              type="button"
-              className="hp-rec-hero"
-              onClick={() => openDetail(recommendHero.id)}
-              aria-label={`View ${recommendHero.name}`}
-            >
-              <div className="hp-rec-hero-img">
-                <img
-                  src={recommendHero.image_url}
-                  alt=""
-                  draggable={false}
-                />
-              </div>
-              <div className="hp-rec-hero-meta">
-                <div className="hp-rec-hero-eyebrow">EDITOR'S PICK</div>
-                <div className="hp-rec-hero-name">
-                  {String(recommendHero.name || '').toUpperCase()}
+            <FadeUp delay={0.1} y={20}>
+              <motion.button
+                type="button"
+                className="hp-rec-hero"
+                onClick={() => openDetail(recommendHero.id)}
+                aria-label={`View ${recommendHero.name}`}
+                whileHover={reduceMotion ? undefined : { y: -3 }}
+                transition={{ duration: 0.45, ease: LUX_EASE }}
+              >
+                <RevealImage
+                  className="hp-rec-hero-img"
+                  duration={1.05}
+                  delay={0.05}
+                  curtain="#0a0a0a"
+                >
+                  <img
+                    src={recommendHero.image_url}
+                    alt=""
+                    draggable={false}
+                  />
+                </RevealImage>
+                <div className="hp-rec-hero-meta">
+                  <div className="hp-rec-hero-eyebrow">EDITOR'S PICK</div>
+                  <div className="hp-rec-hero-name">
+                    {String(recommendHero.name || '').toUpperCase()}
+                  </div>
+                  <div className="hp-rec-hero-cta">
+                    DISCOVER <span aria-hidden="true">{'\u2192'}</span>
+                  </div>
                 </div>
-                <div className="hp-rec-hero-cta">
-                  DISCOVER <span aria-hidden="true">{'\u2192'}</span>
-                </div>
-              </div>
-            </button>
+              </motion.button>
+            </FadeUp>
           )}
 
           {/* Stacked recommendation list */}
-          <div className="hp-rec-list">
+          <Stagger className="hp-rec-list" stagger={0.08} delay={0.15}>
             {recommendItems.map(p => (
-              <button
-                key={p.id}
-                type="button"
-                className="hp-rec-item"
-                onClick={() => openDetail(p.id)}
-                aria-label={`View ${p.name}`}
-              >
-                <div className="hp-rec-item-img">
-                  <img src={p.image_url} alt="" draggable={false} />
-                </div>
-                <div className="hp-rec-item-meta">
-                  <div className="hp-rec-item-brand">{p.brand}</div>
-                  <div className="hp-rec-item-name">{p.name}</div>
-                  <div className="hp-rec-item-price">
-                    {'\u20B9'}{Number(p.price).toLocaleString('en-IN')}
+              <FadeUpItem key={p.id} y={14}>
+                <motion.button
+                  type="button"
+                  className="hp-rec-item"
+                  onClick={() => openDetail(p.id)}
+                  aria-label={`View ${p.name}`}
+                  whileHover={reduceMotion ? undefined : { x: 6 }}
+                  transition={{ duration: 0.4, ease: LUX_EASE }}
+                >
+                  <div className="hp-rec-item-img">
+                    <img src={p.image_url} alt="" draggable={false} />
                   </div>
-                </div>
-                <span className="hp-rec-item-arrow" aria-hidden="true">{'\u2192'}</span>
-              </button>
+                  <div className="hp-rec-item-meta">
+                    <div className="hp-rec-item-brand">{p.brand}</div>
+                    <div className="hp-rec-item-name">{p.name}</div>
+                    <div className="hp-rec-item-price">
+                      {'\u20B9'}{Number(p.price).toLocaleString('en-IN')}
+                    </div>
+                  </div>
+                  <span className="hp-rec-item-arrow" aria-hidden="true">{'\u2192'}</span>
+                </motion.button>
+              </FadeUpItem>
             ))}
-          </div>
+          </Stagger>
         </div>
-      </section>
+      </FadeUp>
 
       {/* ── 6. FOOTER ──────────────────────────────────────────────────── */}
       <Footer setPage={setPage} />
@@ -573,45 +671,25 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           height: 100%;
           object-fit: cover;
           filter: grayscale(.15) contrast(1.02);
-          opacity: .85;
-          animation: hp-hero-img-in 1.6s cubic-bezier(.2,.7,.2,1) both;
+          opacity: .9;
         }
         .hp-hero-img-l {
           left: 4%;
           top: 14%;
           width: 22%;
           height: 56%;
-          animation: hp-hero-l 1.4s cubic-bezier(.2,.7,.2,1) .15s both;
         }
         .hp-hero-img-c {
           right: 6%;
           top: 8%;
           width: 30%;
           height: 78%;
-          animation: hp-hero-c 1.4s cubic-bezier(.2,.7,.2,1) .25s both;
         }
         .hp-hero-img-r {
           left: 10%;
           bottom: 6%;
           width: 18%;
           height: 38%;
-          animation: hp-hero-r 1.4s cubic-bezier(.2,.7,.2,1) .35s both;
-        }
-        @keyframes hp-hero-img-in {
-          from { opacity: 0; }
-          to   { opacity: .85; }
-        }
-        @keyframes hp-hero-l {
-          from { transform: translateX(-32px); opacity: 0; }
-          to   { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes hp-hero-c {
-          from { transform: translateY(40px); opacity: 0; }
-          to   { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes hp-hero-r {
-          from { transform: translateX(32px); opacity: 0; }
-          to   { transform: translateX(0); opacity: 1; }
         }
 
         /* Hero copy block — sits above the imagery, centered */
@@ -634,7 +712,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           margin-bottom: 36px;
           font-weight: 500;
           text-transform: uppercase;
-          animation: hp-fade-up 1s cubic-bezier(.2,.7,.2,1) .1s both;
         }
         .hp-hero-meta-rule {
           display: inline-block;
@@ -657,18 +734,16 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
         .hp-hero-line {
           display: block;
-          animation: hp-fade-up 1.1s cubic-bezier(.2,.7,.2,1) both;
         }
-        .hp-hero-line-1 { animation-delay: .25s; }
+        .hp-hero-line-1 { }
         .hp-hero-line-2 {
-          animation-delay: .4s;
           font-style: italic;
           font-family: var(--fg);
           font-size: 1.1em;
           font-weight: 300;
           letter-spacing: .005em;
         }
-        .hp-hero-line-3 { animation-delay: .55s; }
+        .hp-hero-line-3 { }
 
         .hp-hero-lede {
           font-family: var(--fm);
@@ -678,7 +753,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           color: #444;
           max-width: 520px;
           margin: 0 auto 40px;
-          animation: hp-fade-up 1s cubic-bezier(.2,.7,.2,1) .7s both;
         }
 
         .hp-hero-cta {
@@ -687,7 +761,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           align-items: center;
           flex-wrap: wrap;
           justify-content: center;
-          animation: hp-fade-up 1s cubic-bezier(.2,.7,.2,1) .85s both;
         }
 
         @keyframes hp-fade-up {
@@ -711,7 +784,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           color: #888;
           text-transform: uppercase;
           font-weight: 500;
-          animation: hp-fade-up 1s ease 1s both;
         }
         .hp-hero-foot-sep {
           width: 36px;
@@ -792,11 +864,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           grid-template-columns: repeat(4, 1fr);
           gap: 1px;
           background: #ececec;
-          animation: hp-fade-soft .5s ease both;
-        }
-        @keyframes hp-fade-soft {
-          from { opacity: 0; }
-          to   { opacity: 1; }
         }
 
         /* ─── 4. PROMOTIONAL EDITORIAL ─── */
@@ -1074,17 +1141,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           transform: translateX(6px);
         }
 
-        /* ─── Reveal-on-scroll ─── */
-        .hp-reveal {
-          opacity: 0;
-          transform: translateY(24px);
-          transition: opacity .9s ease, transform .9s ease;
-        }
-        .hp-reveal.hp-revealed {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
         /* ─── Reduced motion ─── */
         @media (prefers-reduced-motion: reduce) {
           .hp-hero-img img,
@@ -1096,7 +1152,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           .hp-hero-lede,
           .hp-hero-cta,
           .hp-hero-foot { animation: none !important; }
-          .hp-reveal { opacity: 1; transform: none; transition: none; }
           .hp-editorial:hover .hp-editorial-img img,
           .hp-rec-hero:hover .hp-rec-hero-img img,
           .hp-rec-item:hover .hp-rec-item-img img { transform: none; }

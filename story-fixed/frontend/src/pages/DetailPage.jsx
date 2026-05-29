@@ -28,6 +28,7 @@ import { getProductImages } from '../utils/productImages.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import PRODUCTS from '../data/products.js';
 import { adaptProducts } from '../data/adapter.js';
+import { FadeUp, Stagger, FadeUpItem, RevealText } from '../components/motion/Motion.jsx';
 
 // Adapt the catalog once at module load so renders reuse a stable array.
 const ADAPTED_PRODUCTS = adaptProducts(PRODUCTS);
@@ -469,21 +470,22 @@ export default function DetailPage({
 
       {/* Related */}
       {related.length > 0 && (
-        <section className="pdp-related" aria-label="You may also like">
+        <FadeUp as="section" className="pdp-related" aria-label="You may also like">
           <h2 className="pdp-related-head">YOU MAY ALSO LIKE</h2>
-          <div className="pdp-related-grid">
+          <Stagger className="pdp-related-grid" stagger={0.06} delay={0.05}>
             {related.slice(0, 4).map(p => (
-              <ProductCard
-                key={p.id}
-                product={p}
-                onClick={() => openDetail && openDetail(p.id)}
-                onQuickAdd={quickAdd}
-                isWish={isWish && isWish(p.id)}
-                onToggleWish={togWish}
-              />
+              <FadeUpItem key={p.id} y={16}>
+                <ProductCard
+                  product={p}
+                  onClick={() => openDetail && openDetail(p.id)}
+                  onQuickAdd={quickAdd}
+                  isWish={isWish && isWish(p.id)}
+                  onToggleWish={togWish}
+                />
+              </FadeUpItem>
             ))}
-          </div>
-        </section>
+          </Stagger>
+        </FadeUp>
       )}
 
       {/* Page-scoped luxury PDP styles. Class names are pdp-* so they

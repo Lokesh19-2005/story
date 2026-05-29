@@ -14,6 +14,7 @@ import CategoryFilterSidebar from '../components/CategoryFilterSidebar.jsx';
 import SortDropdown from '../components/SortDropdown.jsx';
 import GridSwitcher from '../components/GridSwitcher.jsx';
 import MobileFilterDrawer from '../components/MobileFilterDrawer.jsx';
+import { Stagger, FadeUpItem } from '../components/motion/Motion.jsx';
 import { tabToCategorySlug, refineByTab } from '../utils/categoryTabs.js';
 import { filterByGroups, countByGroup } from '../utils/categoryGroups.js';
 import { filterByBrands, countByBrands } from '../utils/brandList.js';
@@ -246,12 +247,20 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
               subtitle={search ? `No results for "${search}"` : 'Try a different filter'}
               action="CLEAR FILTERS" onAction={clearAll} />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0' }}>
+            <Stagger
+              key={`${tab}|${sort}|${search}|${cols}|${groupSel.size}|${brandSel.size}|${sizeSel.size}|${priceSel.size}`}
+              style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0' }}
+              stagger={0.05}
+              delay={0.02}
+              viewport={{ once: true, amount: 0.05 }}
+            >
               {safeProducts.map(p => (
-                <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
-                  onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
+                <FadeUpItem key={p.id} y={16}>
+                  <ProductCard product={p} onClick={() => openDetail(p.id)}
+                    onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
+                </FadeUpItem>
               ))}
-            </div>
+            </Stagger>
           )}
         </div>
       </div>

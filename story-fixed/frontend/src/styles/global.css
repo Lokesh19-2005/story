@@ -123,11 +123,10 @@ a { color: inherit; text-decoration: none; }
 .pc {
   background: #fff; cursor: pointer;
   position: relative; overflow: hidden;
-  transition: box-shadow .25s ease, transform .25s ease;
+  transition: box-shadow .25s ease;
 }
 .pc:hover {
   box-shadow: var(--shadow);
-  transform: translateY(-2px);
 }
 .pc-img { width: 100%; aspect-ratio: 3/4; background: var(--off); overflow: hidden; position: relative; }
 .pc-body { padding: 16px; border-top: var(--bd); }
