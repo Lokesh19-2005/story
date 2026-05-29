@@ -953,7 +953,9 @@ export default function DetailPage({
         .pdp-shipping-row:last-child { border-bottom: none; }
         .pdp-shipping-row > span:last-child { color: #111; text-transform: none; letter-spacing: .04em; }
 
-        /* Sticky mobile CTA — hidden by default, surfaced on small screens */
+        /* Sticky mobile CTA — base layout. Surfaced on small screens
+           by the responsive layer in global.css, which also controls
+           padding, fonts, and 44px touch targets. */
         .pdp-sticky-cta { display: none; }
 
         /* Related rail */
@@ -990,62 +992,37 @@ export default function DetailPage({
             order: 2;
             padding-bottom: 4px;
             scrollbar-width: none;
+            gap: 8px;
           }
           .pdp-gallery-thumbs::-webkit-scrollbar { display: none; }
           .pdp-thumb { width: 64px; flex-shrink: 0; }
 
-          .pdp-name { font-size: 30px; margin-bottom: 18px; }
+          .pdp-name { font-size: clamp(28px, 5vw, 32px); margin-bottom: 18px; }
           .pdp-price-current { font-size: 22px; }
           .pdp-related-grid { grid-template-columns: repeat(2, 1fr); }
           .pdp-related { margin-top: 56px; padding-top: 36px; }
           .pdp-related-head { font-size: 22px; }
-
-          /* Sticky CTA on mobile */
-          .pdp-sticky-cta {
-            display: flex;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            z-index: 50;
-            background: #fff;
-            border-top: var(--bd);
-            padding: 12px 16px;
-            gap: 12px;
-            align-items: center;
-            box-shadow: 0 -4px 14px rgba(0,0,0,.04);
-          }
-          .pdp-sticky-info { flex: 1; min-width: 0; }
-          .pdp-sticky-name {
-            font-family: var(--fm);
-            font-size: 8px;
-            letter-spacing: .14em;
-            color: var(--warm);
-            text-transform: uppercase;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-          .pdp-sticky-price {
-            font-family: var(--fm);
-            font-size: 13px;
-            color: #111;
-            margin-top: 2px;
-            font-weight: 500;
-            letter-spacing: .02em;
-          }
-          .pdp-sticky-cta .btn {
-            height: 44px;
-            flex-shrink: 0;
-            padding: 0 22px;
-            font-size: 9px;
-            letter-spacing: .22em;
-          }
         }
 
         @media (max-width: 640px) {
-          .pdp-name { font-size: 26px; }
+          .pdp-page { padding: 20px 16px 96px; }
+          .pdp-grid { gap: 24px; }
+          .pdp-name { font-size: clamp(24px, 6.5vw, 28px); margin-bottom: 14px; }
           .pdp-trust { padding: 14px 0; gap: 6px; }
           .pdp-trust-line { font-size: 8px; }
           .pdp-tab { padding: 12px 4px; font-size: 8.5px; letter-spacing: .18em; }
+          .pdp-thumb { width: 56px; }
+          .pdp-price-row { gap: 10px; margin-bottom: 22px; }
+          .pdp-price-current { font-size: 20px; }
+          .pdp-section { margin-bottom: 24px; }
+          .pdp-cta { gap: 10px; }
+          .pdp-add-cta { height: 52px; font-size: 9px; padding: 0 16px; }
+          .pdp-wish-btn { width: 52px; height: 52px; }
+          .pdp-tab-content { font-size: 9px; line-height: 1.85; }
+        }
+
+        @media (max-width: 400px) {
+          .pdp-related-grid { grid-template-columns: 1fr; }
         }
       `}</style>
     </div>

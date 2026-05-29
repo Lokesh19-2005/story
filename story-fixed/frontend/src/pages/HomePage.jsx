@@ -1165,7 +1165,7 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
         }
 
         @media (max-width: 900px) {
-          .hp-hero { min-height: 640px; height: 92vh; }
+          .hp-hero { min-height: 620px; height: 88vh; max-height: 820px; }
           .hp-hero-img-l { width: 28%; height: 44%; top: 20%; left: 3%; }
           .hp-hero-img-c { width: 38%; height: 64%; top: 12%; right: 4%; }
           .hp-hero-img-r { width: 22%; height: 30%; bottom: 8%; left: 10%; }
@@ -1173,8 +1173,8 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           .hp-hero-title { margin-bottom: 24px; }
           .hp-hero-lede { font-size: 11.5px; margin-bottom: 28px; }
           .hp-hero-cta { gap: 14px; }
-          .hp-btn { padding: 14px 24px; font-size: 9px; }
-          .hp-btn-link { padding: 14px 4px; font-size: 9px; }
+          .hp-btn { padding: 14px 24px; font-size: 9px; min-height: 44px; }
+          .hp-btn-link { padding: 14px 4px; font-size: 9px; min-height: 44px; }
 
           .hp-cats { padding: 80px 20px 40px; }
           .hp-cats-head { margin-bottom: 44px; }
@@ -1182,6 +1182,7 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
             min-width: 0;
             flex: 1 1 calc(50% - 12px);
             padding: 18px 16px;
+            min-height: 76px;
           }
           .hp-cat-label { font-size: 11px; letter-spacing: .28em; }
           .hp-cat-sub { font-size: 7px; }
@@ -1192,7 +1193,7 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
 
           .hp-editorial { grid-template-columns: 1fr; min-height: auto; }
           .hp-editorial-copy { padding: 64px 24px 40px; }
-          .hp-editorial-img { aspect-ratio: 4/5; }
+          .hp-editorial-img { aspect-ratio: 4/5; min-height: 420px; }
           .hp-editorial-lede { font-size: 11.5px; }
 
           .hp-recs { padding: 80px 20px; }
@@ -1205,28 +1206,83 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
           .hp-rec-item-name { font-size: 18px; }
         }
 
-        @media (max-width: 640px) {
-          .hp-hero { min-height: 580px; }
+        /* Phone landscape / large phone portrait */
+        @media (max-width: 700px) {
+          .hp-hero { min-height: 580px; height: 86vh; }
+          .hp-hero-cta {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            width: min(320px, 100%);
+            margin: 0 auto;
+          }
+          .hp-btn,
+          .hp-btn-link {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+            padding: 14px 20px;
+          }
+          .hp-btn-link {
+            border-bottom: none;
+            border: 1px solid rgba(17,17,17,.3);
+          }
+          .hp-cats { padding: 64px 16px 32px; }
+          .hp-cats-head { margin-bottom: 36px; }
+          .hp-featured { padding: 32px 16px 64px; }
+          .hp-featured-head { margin-bottom: 24px; }
+          .hp-recs { padding: 64px 16px; }
+
+          .hp-editorial-copy { padding: 56px 20px 36px; }
+          .hp-editorial-meta { margin-bottom: 24px; font-size: 8px; gap: 10px; }
+          .hp-editorial-rule { width: 28px; }
+          .hp-editorial-title { margin-bottom: 28px; }
+          .hp-editorial-lede { margin-bottom: 28px; font-size: 11px; line-height: 1.85; }
+          .hp-editorial-caption { left: 20px; bottom: 20px; font-size: 8px; gap: 8px; }
+
+          .hp-rec-hero { aspect-ratio: 4/5; }
+          .hp-rec-hero-meta { padding: 24px; }
+          .hp-rec-hero-name { font-size: 22px; max-width: 90%; }
+        }
+
+        /* Phone portrait */
+        @media (max-width: 520px) {
+          .hp-hero { min-height: 540px; }
           .hp-hero-img-l { display: none; }
           .hp-hero-img-c { width: 60%; height: 56%; top: 18%; right: 6%; opacity: .35; }
           .hp-hero-img-r { width: 40%; height: 28%; bottom: 6%; left: 5%; opacity: .35; }
           .hp-hero-img img { opacity: 1; }
-          .hp-hero-meta { font-size: 8px; gap: 10px; margin-bottom: 24px; }
+          .hp-hero-meta { font-size: 8px; gap: 10px; margin-bottom: 22px; }
           .hp-hero-meta-rule { width: 18px; }
-          .hp-hero-foot { font-size: 7.5px; gap: 12px; }
+          .hp-hero-lede { font-size: 11px; max-width: 360px; margin-bottom: 28px; }
+          .hp-hero-foot { font-size: 7.5px; gap: 12px; bottom: 24px; }
           .hp-hero-foot-sep { width: 22px; }
 
           .hp-cats-rail { gap: 12px; }
-          .hp-cat-btn { flex: 1 1 100%; padding: 16px 14px; }
+          .hp-cat-btn { flex: 1 1 100%; padding: 18px 14px; min-height: 72px; }
 
-          .hp-grid-4 { grid-template-columns: 1fr; }
+          /* Keep a 2-up fashion grid even on small phones — 1-col reads as
+             a barren list and breaks the editorial cadence. */
+          .hp-grid-4 { grid-template-columns: repeat(2, 1fr); }
 
           .hp-rec-item {
             grid-template-columns: 80px 1fr;
+            padding: 12px 0;
           }
           .hp-rec-item-img { width: 80px; }
           .hp-rec-item-arrow { display: none; }
           .hp-rec-item-name { font-size: 16px; }
+          .hp-rec-item-brand { font-size: 7.5px; }
+
+          .hp-rec-hero-name { font-size: 18px; }
+          .hp-rec-hero-cta { font-size: 9px; padding-bottom: 4px; }
+        }
+
+        /* Tiny phones — ensure single column for the product grid where
+           editorial breathing room matters more than density. */
+        @media (max-width: 380px) {
+          .hp-grid-4 { grid-template-columns: 1fr; }
+          .hp-section-title { font-size: clamp(34px, 11vw, 46px) !important; }
         }
       `}</style>
     </div>

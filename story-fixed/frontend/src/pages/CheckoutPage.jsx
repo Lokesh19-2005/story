@@ -19,7 +19,10 @@ const STATES = [
 // ── Must be outside the parent — if inside, inputs lose focus on every keystroke
 function InputField({ label, value, onChange, placeholder, type = 'text', required = false, fullWidth = false, readOnly = false }) {
   return (
-    <div style={fullWidth ? { gridColumn: '1 / -1' } : {}}>
+    <div
+      className={fullWidth ? 'checkout-form-half' : undefined}
+      style={fullWidth ? { gridColumn: '1 / -1' } : {}}
+    >
       <label className="fl2">{label}{required && ' *'}</label>
       <input
         className="fi2"
@@ -225,31 +228,32 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
   };
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 40px' }}>
-      <div style={{ fontFamily: 'var(--fm)', fontSize: '18px', letterSpacing: '.2em', marginBottom: 40 }}>CHECKOUT</div>
+    <div className="checkout-page" style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 40px' }}>
+      <div className="checkout-title" style={{ fontFamily: 'var(--fm)', fontSize: '18px', letterSpacing: '.2em', marginBottom: 40 }}>CHECKOUT</div>
 
       {/* Steps */}
       <div style={{ display: 'flex', borderBottom: 'var(--bd)', marginBottom: 40 }}>
         {['DELIVERY', 'PAYMENT'].map((s, i) => (
           <div key={s} onClick={() => step > i + 1 && setStep(i + 1)} style={{
-            fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.15em', padding: '10px 20px',
+            fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.15em', padding: '14px 20px',
             borderBottom: step === i + 1 ? '2px solid #111' : '2px solid transparent',
             color: step === i + 1 ? '#111' : 'var(--warm)',
             cursor: step > i + 1 ? 'pointer' : 'default',
+            fontWeight: step === i + 1 ? 600 : 400,
           }}>
             {i + 1}. {s}
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 40 }}>
+      <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 40 }}>
         <div>
 
           {/* STEP 1 — Delivery */}
           {step === 1 && (
             <div>
               <div style={{ fontFamily: 'var(--fm)', fontSize: '9px', letterSpacing: '.15em', marginBottom: 20 }}>DELIVERY ADDRESS</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                 <InputField label="Full Name"      required value={form.name}    onChange={handleField('name')}    placeholder="John Doe" />
                 <InputField label="Phone"          required value={form.phone}   onChange={handleField('phone')}   placeholder="9876543210" type="tel" />
                 <InputField label="Email"                   value={form.email}   onChange={handleField('email')}   placeholder="you@email.com" type="email" />
@@ -344,7 +348,7 @@ export default function CheckoutPage({ cart, cTotal, setPage, clearCart, onPlace
         </div>
 
         {/* Order Summary */}
-        <div style={{ background: 'var(--off)', border: 'var(--bd)', padding: 24, alignSelf: 'start', position: 'sticky', top: 80 }}>
+        <div className="checkout-sidebar" style={{ background: 'var(--off)', border: 'var(--bd)', padding: 24, alignSelf: 'start', position: 'sticky', top: 80 }}>
           <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.2em', marginBottom: 16 }}>
             ORDER SUMMARY ({cart.length} item{cart.length !== 1 ? 's' : ''})
           </div>
