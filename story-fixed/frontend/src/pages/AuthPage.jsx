@@ -62,10 +62,10 @@ export default function AuthPage({ setPage, reloadAfterLogin, initialMode, toast
   const switchMode = (m) => { setMode(m); setError(''); setSuccess(''); };
 
   return (
-    <div style={{ minHeight: 'calc(100vh - 120px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
-      <div style={{ width: '100%', maxWidth: 440, background: '#fff', border: 'var(--bd)', padding: '48px 40px' }}>
+    <div className="auth-page" style={{ minHeight: 'calc(100vh - 120px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(24px, 5vw, 60px) 16px' }}>
+      <div className="auth-card" style={{ width: '100%', maxWidth: 440, background: '#fff', border: 'var(--bd)', padding: '48px 40px' }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontFamily: 'var(--fs)', fontSize: '28px', fontWeight: 300, letterSpacing: '.1em', cursor: 'pointer', marginBottom: 8 }} onClick={() => setPage('home')}>STORY™</div>
+          <div className="auth-card-logo" style={{ fontFamily: 'var(--fs)', fontSize: '28px', fontWeight: 300, letterSpacing: '.1em', cursor: 'pointer', marginBottom: 8 }} onClick={() => setPage('home')}>STORY{'\u2122'}</div>
           <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.2em', color: 'var(--warm)' }}>
             {mode === 'forgot' ? 'RESET YOUR PASSWORD' : mode === 'reset' ? 'CREATE NEW PASSWORD' : 'YOUR STYLE, YOUR STORY'}
           </div>

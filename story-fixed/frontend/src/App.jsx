@@ -15,6 +15,7 @@ import { useStaticStore as useStore } from './hooks/useStaticStore.js';
 import { useStaticProducts as useProducts } from './hooks/useStaticProducts.js';
 import { ToastProvider, useToast } from './components/Toast.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { PageTransition } from './components/motion/Motion.jsx';
 
 import BrandTicker   from './components/BrandTicker.jsx';
 import Navbar        from './components/Navbar.jsx';
@@ -116,25 +117,29 @@ function AppInner() {
         toast={toast}
       />
 
-      {page === 'home'     && <HomePage {...commonProps} />}
-      {page === 'about'    && <AboutPage setPage={setPage} />}
-      {page === 'shop'     && <ShopPage  {...commonProps} />}
+      {page === 'home'     && <PageTransition keyId="home"><HomePage {...commonProps} /></PageTransition>}
+      {page === 'about'    && <PageTransition keyId="about"><AboutPage setPage={setPage} /></PageTransition>}
+      {page === 'shop'     && <PageTransition keyId="shop"><ShopPage  {...commonProps} /></PageTransition>}
       {page === 'detail'   && curProductId && (
-        <DetailPage productId={curProductId} addCart={addCart} openDrawer={() => setDrawerOpen(true)} {...commonProps} />
+        <PageTransition keyId={`detail-${curProductId}`}>
+          <DetailPage productId={curProductId} addCart={addCart} openDrawer={() => setDrawerOpen(true)} {...commonProps} />
+        </PageTransition>
       )}
       {page === 'detail'   && !curProductId && (
-        <div style={{ textAlign:'center', padding:'120px 20px' }}>
-          <div style={{ fontFamily:'var(--fm)', fontSize:'11px', letterSpacing:'.2em', marginBottom:24 }}>PRODUCT NOT FOUND</div>
-          <button className="btn btn-k" onClick={() => setPage('shop')}>← BACK TO SHOP</button>
-        </div>
+        <PageTransition keyId="detail-empty">
+          <div style={{ textAlign:'center', padding:'120px 20px' }}>
+            <div style={{ fontFamily:'var(--fm)', fontSize:'11px', letterSpacing:'.2em', marginBottom:24 }}>PRODUCT NOT FOUND</div>
+            <button className="btn btn-k" onClick={() => setPage('shop')}>← BACK TO SHOP</button>
+          </div>
+        </PageTransition>
       )}
-      {page === 'cart'     && <CartPage cart={cart} chQty={chQty} remCart={remCart} setPage={setPage} cTotal={cTotal} toast={toast} />}
-      {page === 'checkout' && <CheckoutPage cart={cart} cTotal={cTotal} setPage={setPage} clearCart={clearCart} onPlaceOrder={handlePlaceOrder} toast={toast} />}
-      {page === 'confirm'  && <ConfirmPage order={confirmedOrder} setPage={setPage} />}
-      {page === 'auth'     && <AuthPage setPage={setPage} reloadAfterLogin={reloadAfterLogin} initialMode={authMode} initialToken={resetToken} toast={toast} />}
-      {page === 'orders'   && <OrdersPage setPage={setPage} initialOrderId={viewOrderId} toast={toast} />}
-      {page === 'profile'  && <ProfilePage setPage={setPage} user={user} />}
-      {page === 'admin'    && <AdminPage setPage={setPage} />}
+      {page === 'cart'     && <PageTransition keyId="cart"><CartPage cart={cart} chQty={chQty} remCart={remCart} setPage={setPage} cTotal={cTotal} toast={toast} /></PageTransition>}
+      {page === 'checkout' && <PageTransition keyId="checkout"><CheckoutPage cart={cart} cTotal={cTotal} setPage={setPage} clearCart={clearCart} onPlaceOrder={handlePlaceOrder} toast={toast} /></PageTransition>}
+      {page === 'confirm'  && <PageTransition keyId="confirm"><ConfirmPage order={confirmedOrder} setPage={setPage} /></PageTransition>}
+      {page === 'auth'     && <PageTransition keyId="auth"><AuthPage setPage={setPage} reloadAfterLogin={reloadAfterLogin} initialMode={authMode} initialToken={resetToken} toast={toast} /></PageTransition>}
+      {page === 'orders'   && <PageTransition keyId="orders"><OrdersPage setPage={setPage} initialOrderId={viewOrderId} toast={toast} /></PageTransition>}
+      {page === 'profile'  && <PageTransition keyId="profile"><ProfilePage setPage={setPage} user={user} /></PageTransition>}
+      {page === 'admin'    && <PageTransition keyId="admin"><AdminPage setPage={setPage} /></PageTransition>}
     </>
   );
 }
