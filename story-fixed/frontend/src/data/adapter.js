@@ -28,18 +28,29 @@ import { CATEGORIES, BADGES } from './products.js';
 //  The legacy slugs are what categoryTabs.js / categoryGroups.js expect.
 // ---------------------------------------------------------------------------
 const CATEGORY_TO_LEGACY_SLUG = {
-  outwear:     'outerwear',
-  headwear:    'accessories',
-  knit:        'tops',
+  outwear:     'uppers',
+  headwear:    'uppers',
+  knit:        'uppers',
   jeans:       'bottoms',
   pants:       'bottoms',
-  shoes:       'shoes',
+  shoes:       'accessories',
   accessories: 'accessories',
 };
 
 const CATEGORY_TO_LABEL = Object.fromEntries(
   CATEGORIES.map(c => [c.id, c.label])
 );
+
+// Labels for the original product categories (used by breadcrumbs / sidebar)
+const ORIGINAL_CATEGORY_LABELS = {
+  outwear:     'UPPERS',
+  headwear:    'UPPERS',
+  knit:        'UPPERS',
+  jeans:       'BOTTOMS',
+  pants:       'BOTTOMS',
+  shoes:       'ACCESSORIES',
+  accessories: 'ACCESSORIES',
+};
 
 // ---------------------------------------------------------------------------
 //  Colour name -> CSS hex. Luxury monochrome palette only.
@@ -98,6 +109,21 @@ function badgeToTag(badge) {
   return up;
 }
 
+// ---------------------------------------------------------------------------
+//  Gender assignment — arbitrary split for demo purposes.
+//  Products in outwear/headwear/knit/jeans/pants get 'men',
+//  products in shoes/accessories get 'women'.
+// ---------------------------------------------------------------------------
+const GENDER_MAP = {
+  outwear:     'men',
+  headwear:    'men',
+  knit:        'men',
+  jeans:       'men',
+  pants:       'men',
+  shoes:       'women',
+  accessories: 'women',
+};
+
 /**
  * Convert a single static-schema Product to the legacy product object the
  * existing UI was built against. Returns `null` for invalid input so callers
@@ -137,7 +163,7 @@ export function adaptProduct(p) {
     //   category_label : human-readable label for breadcrumbs + sidebar.
     category_id:    p.category,
     category_slug:  CATEGORY_TO_LEGACY_SLUG[p.category] || 'accessories',
-    category_label: CATEGORY_TO_LABEL[p.category]       || 'CATEGORY',
+    category_label: ORIGINAL_CATEGORY_LABELS[p.category] || CATEGORY_TO_LABEL[p.category] || 'CATEGORY',
 
     // Imagery. `images` is preferred by productImages.getProductImages,
     // so the hero (index 0) and hover (index 1) light up automatically
@@ -152,6 +178,9 @@ export function adaptProduct(p) {
 
     // Editorial badge -> ProductCard tag
     tag: badgeToTag(p.badge),
+
+    // Gender assignment for demo filtering
+    gender: GENDER_MAP[p.category] || 'women',
   };
 }
 

@@ -1,25 +1,29 @@
-/* ── STORY™ Design System — Black & White Edition ─────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@200;300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── STORY™ Design System — Almina Edition ────────────────────── */
 
 :root {
   --fm: 'Montserrat', sans-serif;
-  --fs: 'Bebas Neue', sans-serif;
+  --fs: 'Cormorant Garamond', serif;
   --fg: 'Cormorant Garamond', serif;
   --white: #ffffff;
-  --cream: #f7f7f5;
-  --off: #efefed;
-  --warm: #888;
+  --cream: #f8f5f0;
+  --off: #f3efe8;
+  --warm: #777777;
   --ink: #111111;
-  --bd: 1px solid #e0e0e0;
+  --bd: 1px solid #e5dfd7;
   --bdh: 1px solid #999;
   --r: 0px;
   --shadow: 0 8px 40px rgba(0,0,0,.10);
+  --accent: #d9c7b8;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  background: var(--white);
+  background: var(--cream);
   color: var(--ink);
   font-family: var(--fm);
   font-size: 13px;
