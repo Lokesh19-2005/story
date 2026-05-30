@@ -10,7 +10,7 @@ export default function PhoneMockup({ children, tilt = 0, className = '' }) {
       <div className="bg-white rounded-[32px] overflow-hidden relative">
         <div className="w-20 h-5 bg-black rounded-full mx-auto mt-2 mb-1" />
         {/* Screen content */}
-        <div className="px-3 pb-4">
+        <div className="px-3 pb-4 max-h-[500px] overflow-y-auto">
           {children}
         </div>
       </div>
