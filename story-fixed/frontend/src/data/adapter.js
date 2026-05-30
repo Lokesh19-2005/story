@@ -25,16 +25,19 @@ import { CATEGORIES, BADGES } from './products.js';
 
 // ---------------------------------------------------------------------------
 //  Category mapping - new schema id -> legacy backend slug.
-//  The legacy slugs are what categoryTabs.js / categoryGroups.js expect.
+//  The legacy slugs are what categoryTabs.js / categoryGroups.js expect,
+//  and productImages.js uses them to resolve fallback imagery. The luxury
+//  4-room model maps onto the original 5 backend slugs as follows:
+//    uppers      -> tops      (shirts, knits, jackets read as 'tops')
+//    bottoms     -> bottoms
+//    accessories -> accessories
+//    co-ords     -> tops      (matched-set imagery is closest to 'tops')
 // ---------------------------------------------------------------------------
 const CATEGORY_TO_LEGACY_SLUG = {
-  outwear:     'outerwear',
-  headwear:    'accessories',
-  knit:        'tops',
-  jeans:       'bottoms',
-  pants:       'bottoms',
-  shoes:       'shoes',
+  uppers:      'tops',
+  bottoms:     'bottoms',
   accessories: 'accessories',
+  'co-ords':   'tops',
 };
 
 const CATEGORY_TO_LABEL = Object.fromEntries(
