@@ -32,6 +32,8 @@ import AuthPage     from './pages/AuthPage.jsx';
 import OrdersPage   from './pages/OrdersPage.jsx';
 import ProfilePage  from './pages/ProfilePage.jsx';
 import AdminPage    from './pages/AdminPage.jsx';
+import ProductArchivePage from './pages/ProductArchivePage.jsx';
+import CategoryPage from './pages/CategoryPage.jsx';
 
 function AppInner() {
   const [page, setPageRaw]              = useState('home');
@@ -41,6 +43,7 @@ function AppInner() {
   const [viewOrderId, setViewOrderId]   = useState(null);
   const [authMode, setAuthMode]         = useState('login');
   const [resetToken, setResetToken]     = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const { user, isLoggedIn, logout, loading: authLoading } = useAuth();
   const toast = useToast();
@@ -66,6 +69,11 @@ function AppInner() {
   };
 
   const openDetail = (id) => { setCurProductId(id); setPage('detail'); };
+
+  const setCategory = (cat) => {
+    setSelectedCategory(cat);
+    setPage('category');
+  };
 
   const quickAdd = async (id) => {
     const p = products.find(x => String(x.id) === String(id));
@@ -135,6 +143,8 @@ function AppInner() {
       {page === 'orders'   && <OrdersPage setPage={setPage} initialOrderId={viewOrderId} toast={toast} />}
       {page === 'profile'  && <ProfilePage setPage={setPage} user={user} />}
       {page === 'admin'    && <AdminPage setPage={setPage} />}
+      {page === 'archive'  && <ProductArchivePage setPage={setPage} setCategory={setCategory} />}
+      {page === 'category' && <CategoryPage setPage={setPage} selectedCategory={selectedCategory} openDetail={openDetail} quickAdd={quickAdd} isWish={isWish} togWish={togWish} />}
     </>
   );
 }
