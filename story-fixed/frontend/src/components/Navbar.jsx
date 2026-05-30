@@ -37,6 +37,7 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
         {/* Right */}
         <div className="nav-right">
           <span className={`nav-link nav-links-desktop${page==='shop'?' active':''}`} style={{ display:'inline' }} onClick={() => go('shop')}>SHOP</span>
+          <span className={`nav-link nav-links-desktop${page==='archive'?' active':''}`} style={{ display:'inline' }} onClick={() => go('archive')}>ARCHIVE</span>
           <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>LOOKBOOK</span>
           <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>CONTACT</span>
           {isLoggedIn ? (
@@ -65,6 +66,7 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
       <div className={`mobile-menu${menuOpen ? ' open' : ''}`}>
         <span className="mobile-menu-link" onClick={() => go('home')}>HOME</span>
         <span className="mobile-menu-link" onClick={() => go('shop')}>SHOP</span>
+        <span className="mobile-menu-link" onClick={() => go('archive')}>ARCHIVE</span>
         <span className="mobile-menu-link" onClick={() => go('about')}>OUR STORY</span>
         {isLoggedIn ? (
           <>
