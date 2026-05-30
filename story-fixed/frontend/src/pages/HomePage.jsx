@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useStaticProducts as useProducts } from '../hooks/useStaticProducts.js';
 import PRODUCTS from '../data/products.js';
 import { adaptProducts } from '../data/adapter.js';
+import { newsletterAPI } from '../services/api.js';
 import ProductCard from '../components/ProductCard.jsx';
 import Footer from '../components/Footer.jsx';
 
@@ -29,6 +30,7 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
   const safeFeatured = Array.isArray(featured) ? featured : [];
 
   const [email, setEmail] = useState('');
+  const [subMsg, setSubMsg] = useState('');
 
   // Hero image - use first product
   const heroProduct = ADAPTED[0] || null;
@@ -65,12 +67,17 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
     return () => io.disconnect();
   }, []);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (email.trim()) {
-      alert('Thank you for subscribing!');
+    if (!email.trim()) return;
+    try {
+      await newsletterAPI.subscribe(email);
+      setSubMsg('Subscribed! Thank you.');
       setEmail('');
+    } catch (err) {
+      setSubMsg(err.message || 'Something went wrong. Please try again.');
     }
+    setTimeout(() => setSubMsg(''), 3000);
   };
 
   return (
@@ -257,6 +264,7 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
             SUBSCRIBE
           </button>
         </form>
+        {subMsg && <p className="text-sm text-[#777] mt-3 font-[Montserrat]">{subMsg}</p>}
       </section>
 
       {/* 7. Footer */}

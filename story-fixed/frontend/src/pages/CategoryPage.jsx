@@ -11,7 +11,7 @@ const CATEGORY_MAP = {
   'uppers': ['outwear', 'headwear', 'knit'],
   'bottoms': ['jeans', 'pants'],
   'accessories': ['shoes', 'accessories'],
-  'co-ords': ['outwear', 'headwear', 'knit', 'jeans', 'pants', 'shoes', 'accessories'],
+  'co-ords': ['outwear', 'knit'],
 };
 
 export default function CategoryPage({ selectedCategory, setPage, openDetail, quickAdd, isWish, togWish }) {
@@ -24,9 +24,9 @@ export default function CategoryPage({ selectedCategory, setPage, openDetail, qu
     let products = ADAPTED.filter(p => categoryIds.includes(p.category_id));
 
     if (activeTab === 'men') {
-      products = products.filter(p => p.gender === 'men');
+      products = products.filter(p => p.gender === 'men' || p.gender === 'unisex');
     } else if (activeTab === 'women') {
-      products = products.filter(p => p.gender === 'women');
+      products = products.filter(p => p.gender === 'women' || p.gender === 'unisex');
     }
 
     return products;

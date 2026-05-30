@@ -110,14 +110,14 @@ function badgeToTag(badge) {
 }
 
 // ---------------------------------------------------------------------------
-//  Gender assignment — arbitrary split for demo purposes.
-//  Products in outwear/headwear/knit/jeans/pants get 'men',
-//  products in shoes/accessories get 'women'.
+//  Gender assignment — balanced split for demo purposes.
+//  outwear/headwear/knit are unisex, jeans/pants are men,
+//  shoes/accessories are women.
 // ---------------------------------------------------------------------------
 const GENDER_MAP = {
-  outwear:     'men',
-  headwear:    'men',
-  knit:        'men',
+  outwear:     'unisex',
+  headwear:    'unisex',
+  knit:        'unisex',
   jeans:       'men',
   pants:       'men',
   shoes:       'women',
