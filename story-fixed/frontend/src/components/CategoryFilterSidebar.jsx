@@ -128,18 +128,23 @@ function FilterSection({
 }
 
 export default function CategoryFilterSidebar({
-  // CATEGORY section
+  // CATEGORY section — kept in props but rendered only when explicitly
+  // requested. The luxury shop now uses the top tab rail as the primary
+  // category axis, so the duplicate sidebar section is hidden by default.
   groups   = CATEGORY_GROUPS,
   selected = new Set(),
   counts   = {},
   onToggle,
   onClear,
-  // BRAND section
+  showCategory = false,
+  // BRAND section — likewise hidden by default to keep the sidebar lean
+  // and editorial. Pass `showBrand` to surface it where useful.
   brands         = BRAND_LIST,
   selectedBrands = new Set(),
   brandCounts    = {},
   onToggleBrand,
   onClearBrands,
+  showBrand = false,
   // SIZE section
   sizes         = SIZE_LIST,
   selectedSizes = new Set(),
@@ -155,15 +160,17 @@ export default function CategoryFilterSidebar({
 }) {
   return (
     <div className="cat-filter">
-      <FilterSection
-        title="CATEGORY"
-        items={groups}
-        selected={selected}
-        counts={counts}
-        onToggle={onToggle}
-        onClear={onClear}
-      />
-      {brands.length > 0 && (
+      {showCategory && (
+        <FilterSection
+          title="CATEGORY"
+          items={groups}
+          selected={selected}
+          counts={counts}
+          onToggle={onToggle}
+          onClear={onClear}
+        />
+      )}
+      {showBrand && brands.length > 0 && (
         <FilterSection
           title="BRAND"
           items={brands}

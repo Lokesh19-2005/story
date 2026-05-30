@@ -1018,3 +1018,517 @@ a { color: inherit; text-decoration: none; }
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+
+
+/* =========================================================================
+   SHOP PAGE  --  LUXURY MONOCHROME EDITORIAL REBUILD
+   --------------------------------------------------------------------------
+   New visual layer for the shop page only. Old `.shop-layout`,
+   `.shop-filters`, `.shop-grid`, `.products-grid` rules above are
+   intentionally retained for back-compat; the rules below either replace
+   or augment them via more specific selectors (`.shop-page .*`) so other
+   surfaces (admin, etc.) are unaffected.
+   ========================================================================= */
+
+.shop-page { background: #fff; }
+
+/* ── Editorial masthead ────────────────────────────────────────────────── */
+.shop-mast {
+  padding: 56px 40px 36px;
+  border-bottom: var(--bd);
+  background: #fff;
+}
+.shop-mast-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--fm);
+  font-size: 9px;
+  letter-spacing: .3em;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.shop-mast-meta { color: #111; }
+.shop-mast-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 26px;
+  height: 1px;
+  background: #111;
+  vertical-align: middle;
+  margin-right: 12px;
+}
+.shop-mast-title {
+  font-family: var(--fg);
+  font-weight: 400;
+  font-size: clamp(64px, 10vw, 168px);
+  line-height: .85;
+  letter-spacing: -.04em;
+  color: #111;
+  display: flex;
+  align-items: baseline;
+  gap: .35em;
+  margin: 0;
+}
+.shop-mast-title > span:first-child {
+  font-style: normal;
+  font-weight: 300;
+}
+.shop-mast-title .shop-mast-italic {
+  font-style: italic;
+  font-weight: 500;
+}
+.shop-mast-sub {
+  margin-top: 22px;
+  max-width: 540px;
+  font-family: var(--fg);
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.45;
+  color: #444;
+  letter-spacing: .005em;
+}
+
+/* ── Control rail ──────────────────────────────────────────────────────── */
+.shop-controls {
+  display: grid;
+  grid-template-columns: minmax(160px, auto) 1fr auto;
+  align-items: center;
+  gap: 22px;
+  padding: 18px 40px;
+  border-bottom: var(--bd);
+  background: #fff;
+}
+.shop-controls-left { display: flex; align-items: center; gap: 14px; }
+.shop-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+.shop-count {
+  font-family: var(--fm);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .25em;
+  color: #111;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Search */
+.shop-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  max-width: 460px;
+  width: 100%;
+  justify-self: center;
+  border: var(--bd);
+  background: #fff;
+  transition: border-color .15s ease;
+}
+.shop-search:hover,
+.shop-search:focus-within { border-color: #111; }
+.shop-search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  flex-shrink: 0;
+  color: #888;
+}
+.shop-search:focus-within .shop-search-icon { color: #111; }
+.shop-search-input {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0 6px;
+  font-family: var(--fm);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: #111;
+}
+.shop-search-input::placeholder {
+  color: #aaa;
+  font-style: italic;
+  letter-spacing: .04em;
+}
+.shop-search-clear {
+  height: 100%;
+  width: 30px;
+  border: none;
+  background: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 11px;
+  transition: color .15s ease;
+}
+.shop-search-clear:hover { color: #111; }
+.shop-search-btn {
+  height: 100%;
+  padding: 0 18px;
+  border: none;
+  border-left: var(--bd);
+  background: #111;
+  color: #fff;
+  font-family: var(--fm);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .25em;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.shop-search-btn:hover { background: #333; }
+
+/* Filter trigger on desktop appears as a luxury pill (mobile-filter-btn
+   already has the visual baseline; we override its display here). */
+.shop-filter-btn { display: inline-flex !important; }
+
+.shop-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--fm);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  color: #888;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color .15s ease;
+}
+.shop-clear:hover { color: #111; }
+
+/* ── Sidebar refinements ───────────────────────────────────────────────── */
+.shop-page .shop-layout {
+  grid-template-columns: 260px 1fr;
+}
+.shop-page .shop-filters {
+  padding: 32px 28px 64px;
+  top: 64px;
+  height: calc(100vh - 64px);
+  border-right: var(--bd);
+  background: #fff;
+}
+.shop-filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--fm);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .3em;
+  color: #111;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid #111;
+  text-transform: uppercase;
+}
+.shop-filters-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--fm);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  color: #888;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-transform: uppercase;
+}
+.shop-filters-clear:hover { color: #111; }
+
+/* ── Product grid ──────────────────────────────────────────────────────── */
+.shop-page .shop-grid {
+  padding: 36px 40px 24px;
+  background: #fff;
+  min-height: 50vh;
+  display: flex;
+  flex-direction: column;
+}
+.shop-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(var(--shop-cols, 3), minmax(0, 1fr));
+  column-gap: 28px;
+  row-gap: 56px;
+  padding-bottom: 48px;
+}
+.shop-grid-inner.cols-2 { column-gap: 32px; row-gap: 64px; }
+.shop-grid-inner.cols-4 { column-gap: 22px; row-gap: 48px; }
+
+/* Editorial product card overrides — subtler border, tighter typography,
+   no boxy hover lift. Cleaner luxury feel. */
+.shop-grid-inner .pc {
+  background: transparent;
+  transition: opacity .25s ease;
+}
+.shop-grid-inner .pc:hover {
+  box-shadow: none;
+  transform: none;
+}
+.shop-grid-inner .pc-body {
+  border-top: none;
+  padding: 14px 0 0;
+}
+.shop-grid-inner .pc-quick {
+  margin-top: 6px;
+  background: transparent;
+  color: #111;
+  border: 1px solid #111;
+  letter-spacing: .25em;
+  transition: background .15s ease, color .15s ease;
+}
+.shop-grid-inner .pc-quick:hover { background: #111; color: #fff; }
+
+/* ── Empty state — compact editorial block ─────────────────────────────── */
+.es-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  padding: 80px 24px;
+  margin: 0 auto;
+  max-width: 560px;
+}
+.es-rule {
+  display: block;
+  width: 56px;
+  height: 1px;
+  background: #111;
+}
+.es-eyebrow {
+  font-family: var(--fm);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .35em;
+  color: #888;
+  text-transform: uppercase;
+  margin: 0;
+}
+.es-title {
+  font-family: var(--fg);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(28px, 4.6vw, 56px);
+  line-height: 1;
+  letter-spacing: -.01em;
+  color: #111;
+  margin: 0;
+}
+.es-sub {
+  font-family: var(--fm);
+  font-size: 11px;
+  letter-spacing: .04em;
+  line-height: 1.7;
+  color: #666;
+  max-width: 440px;
+  margin: 0;
+}
+.es-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  background: none;
+  border: none;
+  border-bottom: 1.5px solid #111;
+  padding: 8px 2px;
+  cursor: pointer;
+  font-family: var(--fm);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .3em;
+  color: #111;
+  text-transform: uppercase;
+  transition: gap .2s ease;
+}
+.es-action:hover { gap: 18px; }
+.es-action-arrow { transition: transform .2s ease; }
+.es-action:hover .es-action-arrow { transform: translateX(4px); }
+
+/* ── Pagination — minimal monochrome editorial ─────────────────────────── */
+.pg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: auto;
+  padding: 32px 0 16px;
+  border-top: var(--bd);
+  font-family: var(--fm);
+}
+.pg-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--fm);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .3em;
+  color: #111;
+  text-transform: uppercase;
+  transition: gap .2s ease, color .15s ease, opacity .15s ease;
+}
+.pg-step[disabled],
+.pg-step[aria-disabled='true'] {
+  opacity: .25;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.pg-step:hover { gap: 16px; }
+.pg-step-arrow {
+  display: inline-block;
+  transition: transform .2s ease;
+}
+.pg-step:hover .pg-step-arrow:first-child { transform: translateX(-3px); }
+.pg-step:hover .pg-step-arrow:last-child  { transform: translateX(3px); }
+
+.pg-mid {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.pg-counter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--fg);
+  font-style: italic;
+  font-size: 22px;
+  font-weight: 400;
+  color: #111;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+.pg-counter-sep { color: #aaa; }
+.pg-counter-tot { color: #888; font-size: 16px; }
+
+.pg-list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 4px;
+}
+.pg-num {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--fm);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: #888;
+  font-variant-numeric: tabular-nums;
+  transition: color .15s ease, background .15s ease;
+}
+.pg-num:hover { color: #111; }
+.pg-num.is-active {
+  color: #fff;
+  background: #111;
+}
+.pg-gap {
+  font-family: var(--fm);
+  font-size: 8px;
+  letter-spacing: .2em;
+  color: #ccc;
+  padding: 0 4px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .shop-mast { padding: 44px 28px 28px; }
+  .shop-controls { padding: 16px 28px; }
+  .shop-page .shop-grid { padding: 28px 28px 20px; }
+  .shop-page .shop-layout { grid-template-columns: 220px 1fr; }
+  .shop-grid-inner { column-gap: 22px; row-gap: 44px; }
+}
+
+@media (max-width: 900px) {
+  .shop-mast {
+    padding: 40px 24px 24px;
+  }
+  .shop-mast-title { font-size: clamp(56px, 12vw, 96px); }
+  .shop-mast-sub { font-size: 16px; }
+  .shop-controls {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px 24px;
+  }
+  .shop-controls-left { justify-content: flex-start; }
+  .shop-controls-right { justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .shop-search { max-width: none; justify-self: stretch; }
+
+  .shop-page .shop-layout { grid-template-columns: 1fr; }
+  .shop-page .shop-filters { display: none; }
+  .shop-page .shop-grid { padding: 24px 24px 16px; }
+  .shop-grid-inner,
+  .shop-grid-inner.cols-2,
+  .shop-grid-inner.cols-3,
+  .shop-grid-inner.cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 18px;
+    row-gap: 36px;
+  }
+}
+
+@media (max-width: 640px) {
+  .shop-mast {
+    padding: 32px 16px 20px;
+  }
+  .shop-mast-top { font-size: 8.5px; letter-spacing: .25em; margin-bottom: 18px; }
+  .shop-mast-eyebrow::before { width: 16px; margin-right: 8px; }
+  .shop-mast-title {
+    font-size: clamp(48px, 16vw, 72px);
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: .25em;
+  }
+  .shop-mast-sub { font-size: 14px; line-height: 1.5; margin-top: 16px; }
+
+  .shop-controls {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .shop-controls-right { gap: 8px; }
+  .shop-clear { display: none; }
+
+  .shop-page .shop-grid { padding: 18px 16px 12px; }
+  .shop-grid-inner,
+  .shop-grid-inner.cols-2,
+  .shop-grid-inner.cols-3,
+  .shop-grid-inner.cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 14px;
+    row-gap: 28px;
+  }
+
+  /* Pagination -- collapse the numeric strip on the smallest screens */
+  .pg { gap: 12px; padding: 24px 0 12px; }
+  .pg-list { display: none; }
+  .pg-counter { font-size: 18px; }
+  .pg-counter-tot { font-size: 13px; }
+  .pg-step { font-size: 8.5px; letter-spacing: .25em; }
+}
