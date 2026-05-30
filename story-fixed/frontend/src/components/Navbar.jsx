@@ -1,4 +1,3 @@
-// Navbar — Black & White editorial style with mobile menu
 import { useState } from 'react';
 
 export default function Navbar({ page, setPage, cartCount, openDrawer, user, isLoggedIn, onLogout }) {
@@ -6,89 +5,161 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
 
   const go = (p) => { setPage(p); setMenuOpen(false); };
 
+  const navLinks = [
+    { label: 'HOME', target: 'home', primary: true },
+    { label: 'SHOP', target: 'shop', primary: true },
+    { label: 'COLLECTIONS', target: 'shop', primary: false },
+    { label: 'ABOUT', target: 'about', primary: true },
+    { label: 'JOURNAL', target: 'about', primary: false },
+  ];
+
   return (
     <>
-      <nav className="nav">
-        {/* Left links */}
-        <div className="nav-left nav-links-desktop" style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-          <span className={`nav-link${page==='about'?' active':''}`} onClick={() => go('about')}>ABOUT</span>
-          <span className="nav-link" style={{ color: '#ccc', cursor: 'default' }}>PRESS</span>
-          <span className={`nav-link${page==='about'?' active':''}`} onClick={() => go('about')}>OUR STORY</span>
-        </div>
+      <nav className="sticky top-0 z-50 bg-white border-b border-[#EAEAEA]">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-8 h-16">
+          {/* Left - Logo */}
+          <div
+            className="font-bold text-xl tracking-[0.15em] uppercase cursor-pointer select-none"
+            onClick={() => go('home')}
+          >
+            STORY<sup className="text-[9px] ml-0.5">TM</sup>
+          </div>
 
-        {/* Hamburger (mobile) */}
-        <button
-          className="nav-hamburger"
-          onClick={() => setMenuOpen(o => !o)}
-          aria-label="Menu"
-          style={{ display: 'none' }}
-        >
-          <span style={{ transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
-          <span style={{ opacity: menuOpen ? 0 : 1 }} />
-          <span style={{ transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
-        </button>
+          {/* Center - Navigation (hidden on mobile) */}
+          <div className="hidden md:flex items-center gap-7">
+            {navLinks.map((link) => (
+              <span
+                key={link.label}
+                onClick={() => go(link.target)}
+                className={`text-[11px] uppercase tracking-[0.2em] font-medium cursor-pointer transition-colors ${
+                  link.primary && page === link.target
+                    ? 'text-black border-b-[1.5px] border-black pb-0.5'
+                    : 'text-[#666] hover:text-black'
+                }`}
+              >
+                {link.label}
+              </span>
+            ))}
+          </div>
 
-        {/* Logo center */}
-        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => go('home')}>
-          <div className="nav-logo">STORY™</div>
-          <div className="nav-sub">WRITE YOUR OWN STYLE</div>
-        </div>
+          {/* Right - Icons */}
+          <div className="flex items-center gap-5">
+            {/* Search icon */}
+            <button className="hidden md:block" aria-label="Search">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+            </button>
 
-        {/* Right */}
-        <div className="nav-right">
-          <span className={`nav-link nav-links-desktop${page==='shop'?' active':''}`} style={{ display:'inline' }} onClick={() => go('shop')}>SHOP</span>
-          <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>LOOKBOOK</span>
-          <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>CONTACT</span>
-          {isLoggedIn ? (
-            <>
-              <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('orders')}>ORDERS</button>
-              <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('profile')}>
-                {user?.name?.split(' ')[0]?.toUpperCase() || 'ACCOUNT'}
-              </button>
-              {user?.role === 'admin' && (
-                <button className="nav-icon" onClick={() => go('admin')} style={{ color: '#111', fontWeight: 700 }}>ADMIN</button>
+            {/* Cart icon */}
+            <button className="relative" onClick={openDrawer} aria-label="Cart">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-black text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px]">
+                  {cartCount}
+                </span>
               )}
-            </>
-          ) : (
-            <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('auth')}>SIGN IN</button>
-          )}
-          <button className="nav-icon" onClick={openDrawer} style={{ position: 'relative' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/>
-            </svg>
-            {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
-          </button>
+            </button>
+
+            {/* Hamburger icon (mobile only) */}
+            <button
+              className="md:hidden flex flex-col justify-center items-center w-6 h-6 gap-[5px]"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Menu"
+            >
+              <span
+                className={`block w-5 h-[1.5px] bg-black transition-transform duration-300 ${
+                  menuOpen ? 'rotate-45 translate-y-[6.5px]' : ''
+                }`}
+              />
+              <span
+                className={`block w-5 h-[1.5px] bg-black transition-opacity duration-300 ${
+                  menuOpen ? 'opacity-0' : ''
+                }`}
+              />
+              <span
+                className={`block w-5 h-[1.5px] bg-black transition-transform duration-300 ${
+                  menuOpen ? '-rotate-45 -translate-y-[6.5px]' : ''
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* Mobile dropdown menu */}
-      <div className={`mobile-menu${menuOpen ? ' open' : ''}`}>
-        <span className="mobile-menu-link" onClick={() => go('home')}>HOME</span>
-        <span className="mobile-menu-link" onClick={() => go('shop')}>SHOP</span>
-        <span className="mobile-menu-link" onClick={() => go('about')}>OUR STORY</span>
-        {isLoggedIn ? (
-          <>
-            <span className="mobile-menu-link" onClick={() => go('orders')}>ORDERS</span>
-            <span className="mobile-menu-link" onClick={() => go('profile')}>ACCOUNT</span>
-          </>
-        ) : (
-          <span className="mobile-menu-link" onClick={() => go('auth')}>SIGN IN</span>
-        )}
+      {/* Mobile menu (md:hidden) */}
+      <div
+        className={`md:hidden fixed top-16 left-0 right-0 z-40 bg-white border-b border-[#EAEAEA] transition-all duration-300 overflow-hidden ${
+          menuOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="flex flex-col px-8 py-6 gap-4">
+          {navLinks.map((link) => (
+            <span
+              key={link.label}
+              onClick={() => go(link.target)}
+              className={`text-[12px] uppercase tracking-[0.2em] font-medium cursor-pointer transition-colors ${
+                link.primary && page === link.target
+                  ? 'text-black'
+                  : 'text-[#666]'
+              }`}
+            >
+              {link.label}
+            </span>
+          ))}
+
+          <div className="border-t border-[#EAEAEA] my-2" />
+
+          {isLoggedIn ? (
+            <>
+              <span
+                onClick={() => go('profile')}
+                className="text-[12px] uppercase tracking-[0.2em] font-medium text-[#666] cursor-pointer hover:text-black transition-colors"
+              >
+                PROFILE
+              </span>
+              <span
+                onClick={() => go('orders')}
+                className="text-[12px] uppercase tracking-[0.2em] font-medium text-[#666] cursor-pointer hover:text-black transition-colors"
+              >
+                ORDERS
+              </span>
+              {user?.role === 'admin' && (
+                <span
+                  onClick={() => go('admin')}
+                  className="text-[12px] uppercase tracking-[0.2em] font-medium text-[#666] cursor-pointer hover:text-black transition-colors"
+                >
+                  ADMIN
+                </span>
+              )}
+              <span
+                onClick={() => { onLogout(); setMenuOpen(false); }}
+                className="text-[12px] uppercase tracking-[0.2em] font-medium text-[#666] cursor-pointer hover:text-black transition-colors"
+              >
+                LOGOUT
+              </span>
+            </>
+          ) : (
+            <span
+              onClick={() => go('auth')}
+              className="text-[12px] uppercase tracking-[0.2em] font-medium text-[#666] cursor-pointer hover:text-black transition-colors"
+            >
+              SIGN IN
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Overlay to close mobile menu */}
+      {/* Overlay for mobile menu */}
       {menuOpen && (
-        <div onClick={() => setMenuOpen(false)}
-          style={{ position:'fixed', inset:0, zIndex:198, background:'rgba(0,0,0,.2)' }} />
+        <div
+          className="md:hidden fixed inset-0 z-30 bg-black/20"
+          onClick={() => setMenuOpen(false)}
+        />
       )}
-
-      <style>{`
-        @media (max-width: 900px) {
-          .nav-hamburger { display: flex !important; }
-          .nav-links-desktop { display: none !important; }
-          .nav { grid-template-columns: auto 1fr auto !important; }
-        }
-      `}</style>
     </>
   );
 }

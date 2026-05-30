@@ -1,19 +1,23 @@
-/* ── STORY™ Design System — Black & White Edition ─────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@200;300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── STORY(TM) Design System — Monochrome Edition ─────────────── */
 
 :root {
-  --fm: 'Montserrat', sans-serif;
-  --fs: 'Bebas Neue', sans-serif;
-  --fg: 'Cormorant Garamond', serif;
+  --fm: 'Inter', sans-serif;
+  --fs: 'Inter', sans-serif;
+  --fg: 'Inter', sans-serif;
   --white: #ffffff;
-  --cream: #f7f7f5;
-  --off: #efefed;
-  --warm: #888;
-  --ink: #111111;
-  --bd: 1px solid #e0e0e0;
+  --cream: #ffffff;
+  --off: #f8f8f8;
+  --warm: #666666;
+  --ink: #000000;
+  --bd: 1px solid #EAEAEA;
   --bdh: 1px solid #999;
   --r: 0px;
-  --shadow: 0 8px 40px rgba(0,0,0,.10);
+  --shadow: 0 4px 20px rgba(0,0,0,.04);
+  --accent: #000000;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -348,8 +352,9 @@ a { color: inherit; text-decoration: none; }
 ::-webkit-scrollbar-thumb { background: #ccc; }
 
 /* ── Animations ── */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 .fade-up { animation: fadeUp .5s ease forwards; }
+.animate-fadeUp { animation: fadeUp 0.8s ease forwards; }
 
 /* ── Toast ── */
 .toast {
