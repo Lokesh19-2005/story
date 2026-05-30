@@ -1,4 +1,4 @@
-// Footer — black & white
+// Footer — dark 4-column footer with newsletter
 import { useState } from 'react';
 import { newsletterAPI } from '../services/api.js';
 
@@ -19,51 +19,67 @@ export default function Footer({ setPage }) {
   };
 
   return (
-    <footer style={{ background: '#0d0d0d', color: '#fff', marginTop: 0 }}>
-      {/* Top footer */}
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '60px 40px', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40 }}>
+    <footer className="bg-[#111111] text-white">
+      {/* Main footer grid */}
+      <div className="max-w-7xl mx-auto py-16 px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        {/* Column 1: Brand + Newsletter */}
         <div>
-          <div style={{ fontFamily: 'var(--fs)', fontSize: '36px', letterSpacing: '.08em', marginBottom: 12 }}>STORY™</div>
-          <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.15em', color: '#555', lineHeight: 2.2, marginBottom: 28 }}>
-            WRITE YOUR OWN STYLE<br />
-            Genuine premium fashion for everyone.
+          <div className="font-[Cormorant_Garamond] text-3xl tracking-wider mb-3">STORY</div>
+          <p className="text-sm text-[#777] mb-6 leading-relaxed">Crafted for contemporary elegance</p>
+          <div className="flex flex-col gap-3">
+            <input
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Your email address"
+              className="w-full rounded-full border border-[#333] bg-transparent text-white placeholder-[#555] px-4 py-3 text-sm outline-none focus:border-[#d9c7b8] transition-colors"
+              onKeyDown={e => e.key === 'Enter' && subscribe()}
+            />
+            <button
+              className="bg-[#d9c7b8] text-[#111] rounded-full px-6 py-3 font-medium text-xs tracking-wider hover:bg-[#c9b7a8] transition-colors cursor-pointer border-none font-[Montserrat]"
+              onClick={subscribe}
+            >
+              SUBSCRIBE
+            </button>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email"
-              style={{ flex: 1, background: '#1a1a1a', border: '1px solid #333', padding: '11px 12px', fontFamily: 'var(--fm)', fontSize: '8px', color: '#fff', outline: 'none', letterSpacing: '.05em' }}
-              onKeyDown={e => e.key === 'Enter' && subscribe()} />
-            <button className="btn" style={{ background: '#fff', color: '#111', fontSize: '7.5px', padding: '11px 18px', letterSpacing: '.2em', fontWeight: 700 }} onClick={subscribe}>JOIN</button>
-          </div>
-          {subMsg && <div style={{ fontFamily: 'var(--fm)', fontSize: '7.5px', color: '#666', marginTop: 8 }}>{subMsg}</div>}
+          {subMsg && <p className="text-xs text-[#777] mt-3 font-[Montserrat]">{subMsg}</p>}
         </div>
 
-        {[
-          { title: 'SHOP', links: [['All Products', 'shop'], ['New Arrivals', 'shop'], ['Sale Items', 'shop']] },
-          { title: 'ACCOUNT', links: [['Sign In', 'auth'], ['Orders', 'orders'], ['Profile', 'profile']] },
-          { title: 'INFO', links: [['About Us', 'about'], ['Our Story', 'about'], ['Contact', 'about']] },
-        ].map(col => (
-          <div key={col.title}>
-            <div style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.3em', marginBottom: 20, fontWeight: 600, color: '#fff' }}>{col.title}</div>
-            {col.links.map(([label, pg]) => (
-              <div key={label} onClick={() => setPage(pg)}
-                style={{ fontFamily: 'var(--fm)', fontSize: '8px', letterSpacing: '.08em', color: '#555', marginBottom: 12, cursor: 'pointer', transition: 'color .15s' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-                onMouseLeave={e => e.currentTarget.style.color = '#555'}>
-                {label}
-              </div>
-            ))}
+        {/* Column 2: Shop */}
+        <div>
+          <h4 className="text-xs tracking-[0.2em] font-semibold text-white mb-4 font-[Montserrat]">SHOP</h4>
+          <div className="flex flex-col gap-3">
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('shop')}>All Products</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('shop')}>New Arrivals</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('shop')}>Sale Items</span>
           </div>
-        ))}
+        </div>
+
+        {/* Column 3: Categories */}
+        <div>
+          <h4 className="text-xs tracking-[0.2em] font-semibold text-white mb-4 font-[Montserrat]">CATEGORIES</h4>
+          <div className="flex flex-col gap-3">
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('shop')}>Uppers</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('shop')}>Bottoms</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('shop')}>Accessories</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('shop')}>Co-Ords</span>
+          </div>
+        </div>
+
+        {/* Column 4: Connect */}
+        <div>
+          <h4 className="text-xs tracking-[0.2em] font-semibold text-white mb-4 font-[Montserrat]">CONNECT</h4>
+          <div className="flex flex-col gap-3">
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]">Instagram</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]">Twitter</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]">Pinterest</span>
+            <span className="text-sm text-[#777] hover:text-white cursor-pointer transition-colors font-[Montserrat]" onClick={() => setPage('about')}>Contact Us</span>
+          </div>
+        </div>
       </div>
 
       {/* Bottom bar */}
-      <div style={{ borderTop: '1px solid #1a1a1a', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ fontFamily: 'var(--fm)', fontSize: '7.5px', letterSpacing: '.1em', color: '#444' }}>© 2025 STORY™. ALL RIGHTS RESERVED.</div>
-        <div style={{ display: 'flex', gap: 24 }}>
-          {['GST INCLUSIVE PRICING', 'FREE SHIPPING OVER ₹1500', 'EASY RETURNS'].map(t => (
-            <div key={t} style={{ fontFamily: 'var(--fm)', fontSize: '7px', letterSpacing: '.15em', color: '#444' }}>{t}</div>
-          ))}
-        </div>
+      <div className="border-t border-[#222] mx-8 mt-12 pt-6 pb-6">
+        <p className="text-xs text-[#555] font-[Montserrat] text-center">&copy; 2025 STORY. All rights reserved.</p>
       </div>
     </footer>
   );
