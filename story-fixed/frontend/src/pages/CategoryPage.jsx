@@ -126,16 +126,6 @@ export default function CategoryPage({ selectedCategory, setPage, openDetail, qu
       </div>
 
       <Footer setPage={setPage} />
-
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeUp {
-          animation: fadeUp 0.8s ease forwards;
-        }
-      `}</style>
     </div>
   );
 }

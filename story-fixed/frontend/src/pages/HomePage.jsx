@@ -31,13 +31,18 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (!email) return;
+    const trimmed = email.trim();
+    if (!trimmed) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setSubMsg('Please enter a valid email address.');
+      return;
+    }
     try {
-      await newsletterAPI.subscribe(email);
+      await newsletterAPI.subscribe(trimmed);
       setSubMsg('Thank you for subscribing.');
       setEmail('');
     } catch (err) {
-      setSubMsg(err.message || 'Something went wrong. Please try again.');
+      setSubMsg('Something went wrong. Please try again.');
     }
   };
 
@@ -303,16 +308,6 @@ export default function HomePage({ setPage, openDetail, quickAdd, isWish, togWis
 
       {/* SECTION 7: FOOTER */}
       <Footer setPage={setPage} />
-
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeUp {
-          animation: fadeUp 0.8s ease forwards;
-        }
-      `}</style>
     </div>
   );
 }

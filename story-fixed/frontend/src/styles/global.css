@@ -15,7 +15,7 @@
   --ink: #000000;
   --bd: 1px solid #EAEAEA;
   --bdh: 1px solid #999;
-  --r: 4px;
+  --r: 0px;
   --shadow: 0 4px 20px rgba(0,0,0,.04);
   --accent: #000000;
 }
@@ -352,8 +352,9 @@ a { color: inherit; text-decoration: none; }
 ::-webkit-scrollbar-thumb { background: #ccc; }
 
 /* ── Animations ── */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 .fade-up { animation: fadeUp .5s ease forwards; }
+.animate-fadeUp { animation: fadeUp 0.8s ease forwards; }
 
 /* ── Toast ── */
 .toast {

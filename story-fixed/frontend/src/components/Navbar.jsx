@@ -6,19 +6,12 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
   const go = (p) => { setPage(p); setMenuOpen(false); };
 
   const navLinks = [
-    { label: 'HOME', target: 'home' },
-    { label: 'SHOP', target: 'shop' },
-    { label: 'COLLECTIONS', target: 'shop' },
-    { label: 'ABOUT', target: 'about' },
-    { label: 'JOURNAL', target: 'about' },
+    { label: 'HOME', target: 'home', primary: true },
+    { label: 'SHOP', target: 'shop', primary: true },
+    { label: 'COLLECTIONS', target: 'shop', primary: false },
+    { label: 'ABOUT', target: 'about', primary: true },
+    { label: 'JOURNAL', target: 'about', primary: false },
   ];
-
-  const isActive = (target) => {
-    if (target === 'home' && page === 'home') return true;
-    if (target === 'shop' && page === 'shop') return true;
-    if (target === 'about' && page === 'about') return true;
-    return false;
-  };
 
   return (
     <>
@@ -39,7 +32,7 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
                 key={link.label}
                 onClick={() => go(link.target)}
                 className={`text-[11px] uppercase tracking-[0.2em] font-medium cursor-pointer transition-colors ${
-                  isActive(link.target) && link.label === (page === 'home' ? 'HOME' : page === 'shop' ? 'SHOP' : page === 'about' ? 'ABOUT' : '')
+                  link.primary && page === link.target
                     ? 'text-black border-b-[1.5px] border-black pb-0.5'
                     : 'text-[#666] hover:text-black'
                 }`}
@@ -109,7 +102,7 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
               key={link.label}
               onClick={() => go(link.target)}
               className={`text-[12px] uppercase tracking-[0.2em] font-medium cursor-pointer transition-colors ${
-                isActive(link.target) && link.label === (page === 'home' ? 'HOME' : page === 'shop' ? 'SHOP' : page === 'about' ? 'ABOUT' : '')
+                link.primary && page === link.target
                   ? 'text-black'
                   : 'text-[#666]'
               }`}
