@@ -246,7 +246,7 @@ export default function ShopPage({ setPage, openDetail, quickAdd, isWish, togWis
               subtitle={search ? `No results for "${search}"` : 'Try a different filter'}
               action="CLEAR FILTERS" onAction={clearAll} />
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e0e0e0' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 1, background: '#e5dfd7' }}>
               {safeProducts.map(p => (
                 <ProductCard key={p.id} product={p} onClick={() => openDetail(p.id)}
                   onQuickAdd={quickAdd} isWish={isWish(p.id)} onToggleWish={togWish} />
