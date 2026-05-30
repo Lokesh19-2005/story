@@ -1,19 +1,27 @@
-// BrandTicker — scrolling top bar with real brands
-const BRANDS = [
-  'VERSACE','KARL LAGERFELD','LACOSTE','SUPERDRY','TOMMY HILFIGER',
-  'BURBERRY','TRUE RELIGION','RARE RABBIT','BLACKBERRYS','ZARA',
-  'CALVIN KLEIN','MICHAEL KORS','HUGO BOSS','RALPH LAUREN',
-];
+// BrandTicker — infinite scrolling marquee with luxury brand names
+const BRANDS = ['VERSACE', 'PRADA', 'CALVIN KLEIN', 'ZARA', 'LACOSTE', 'ARMANI'];
 
 export default function BrandTicker() {
   const doubled = [...BRANDS, ...BRANDS];
   return (
-    <div className="brand-ticker-wrap">
-      <div className="brand-ticker-inner">
-        {doubled.map((b, i) => (
-          <span key={i}>{b}<span style={{ color: '#555', margin: '0 8px' }}>·</span></span>
+    <div className="w-full bg-[#111111] overflow-hidden py-3">
+      <div className="brand-ticker-track flex items-center whitespace-nowrap">
+        {doubled.map((brand, i) => (
+          <span key={i} className="font-[Montserrat] text-[10px] uppercase tracking-[0.3em] text-white font-medium mx-4 inline-flex items-center">
+            {brand}
+            <span className="text-[#555] mx-4">&middot;</span>
+          </span>
         ))}
       </div>
+      <style>{`
+        .brand-ticker-track {
+          animation: ticker-scroll 30s linear infinite;
+        }
+        @keyframes ticker-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </div>
   );
 }

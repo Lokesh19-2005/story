@@ -68,13 +68,10 @@ const lux = (photoId) =>
 /** @typedef {('outwear'|'headwear'|'knit'|'jeans'|'pants'|'shoes'|'accessories')} CategoryId */
 
 export const CATEGORIES = Object.freeze([
-  { id: 'outwear',     label: 'OUTWEAR',     slug: 'outwear'     },
-  { id: 'headwear',    label: 'HEADWEAR',    slug: 'headwear'    },
-  { id: 'knit',        label: 'KNIT',        slug: 'knit'        },
-  { id: 'jeans',       label: 'JEANS',       slug: 'jeans'       },
-  { id: 'pants',       label: 'PANTS',       slug: 'pants'       },
-  { id: 'shoes',       label: 'SHOES',       slug: 'shoes'       },
+  { id: 'uppers',      label: 'UPPERS',      slug: 'uppers'      },
+  { id: 'bottoms',     label: 'BOTTOMS',     slug: 'bottoms'     },
   { id: 'accessories', label: 'ACCESSORIES', slug: 'accessories' },
+  { id: 'co-ords',     label: 'CO-ORDS',     slug: 'co-ords'     },
 ]);
 
 export const CATEGORY_IDS = CATEGORIES.map(c => c.id);

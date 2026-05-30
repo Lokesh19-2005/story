@@ -1,4 +1,4 @@
-// Navbar — Black & White editorial style with mobile menu
+// Navbar — Sticky elegant navbar with mobile hamburger menu
 import { useState } from 'react';
 
 export default function Navbar({ page, setPage, cartCount, openDrawer, user, isLoggedIn, onLogout }) {
@@ -8,87 +8,102 @@ export default function Navbar({ page, setPage, cartCount, openDrawer, user, isL
 
   return (
     <>
-      <nav className="nav">
-        {/* Left links */}
-        <div className="nav-left nav-links-desktop" style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-          <span className={`nav-link${page==='about'?' active':''}`} onClick={() => go('about')}>ABOUT</span>
-          <span className="nav-link" style={{ color: '#ccc', cursor: 'default' }}>PRESS</span>
-          <span className={`nav-link${page==='about'?' active':''}`} onClick={() => go('about')}>OUR STORY</span>
+      <nav className="sticky top-0 z-50 bg-[#f8f5f0] border-b border-[#e5dfd7] flex items-center justify-between px-8 py-4">
+        {/* Left nav links (desktop only) */}
+        <div className="hidden md:flex items-center gap-6">
+          <span
+            className={`font-[Montserrat] uppercase text-xs tracking-[0.2em] cursor-pointer transition-colors duration-200 ${page === 'shop' ? 'text-[#111]' : 'text-[#777] hover:text-[#111]'}`}
+            onClick={() => go('shop')}
+          >
+            SHOP
+          </span>
+          <span
+            className={`font-[Montserrat] uppercase text-xs tracking-[0.2em] cursor-pointer transition-colors duration-200 ${page === 'about' ? 'text-[#111]' : 'text-[#777] hover:text-[#111]'}`}
+            onClick={() => go('about')}
+          >
+            ABOUT
+          </span>
         </div>
 
-        {/* Hamburger (mobile) */}
+        {/* Hamburger (mobile only) */}
         <button
-          className="nav-hamburger"
+          className="flex md:hidden flex-col justify-center items-center w-8 h-8 gap-[5px] bg-transparent border-none cursor-pointer"
           onClick={() => setMenuOpen(o => !o)}
           aria-label="Menu"
-          style={{ display: 'none' }}
         >
-          <span style={{ transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none' }} />
-          <span style={{ opacity: menuOpen ? 0 : 1 }} />
-          <span style={{ transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none' }} />
+          <span className={`block w-5 h-[1.5px] bg-[#111] transition-transform duration-300 origin-center ${menuOpen ? 'translate-y-[6.5px] rotate-45' : ''}`} />
+          <span className={`block w-5 h-[1.5px] bg-[#111] transition-opacity duration-300 ${menuOpen ? 'opacity-0' : 'opacity-100'}`} />
+          <span className={`block w-5 h-[1.5px] bg-[#111] transition-transform duration-300 origin-center ${menuOpen ? '-translate-y-[6.5px] -rotate-45' : ''}`} />
         </button>
 
-        {/* Logo center */}
-        <div style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => go('home')}>
-          <div className="nav-logo">STORY™</div>
-          <div className="nav-sub">WRITE YOUR OWN STYLE</div>
+        {/* Center logo */}
+        <div
+          className="font-[Cormorant_Garamond] text-3xl font-light tracking-wider cursor-pointer text-[#111] select-none"
+          onClick={() => go('home')}
+        >
+          STORY
         </div>
 
-        {/* Right */}
-        <div className="nav-right">
-          <span className={`nav-link nav-links-desktop${page==='shop'?' active':''}`} style={{ display:'inline' }} onClick={() => go('shop')}>SHOP</span>
-          <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>LOOKBOOK</span>
-          <span className="nav-link nav-links-desktop" style={{ display:'inline', color:'#ccc', cursor:'default' }}>CONTACT</span>
+        {/* Right side */}
+        <div className="flex items-center gap-5">
           {isLoggedIn ? (
-            <>
-              <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('orders')}>ORDERS</button>
-              <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('profile')}>
-                {user?.name?.split(' ')[0]?.toUpperCase() || 'ACCOUNT'}
-              </button>
-              {user?.role === 'admin' && (
-                <button className="nav-icon" onClick={() => go('admin')} style={{ color: '#111', fontWeight: 700 }}>ADMIN</button>
-              )}
-            </>
+            <span
+              className="hidden md:inline font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors duration-200"
+              onClick={() => go('profile')}
+            >
+              {user?.name?.split(' ')[0]?.toUpperCase() || 'ACCOUNT'}
+            </span>
           ) : (
-            <button className="nav-icon nav-links-desktop" style={{ display:'inline' }} onClick={() => go('auth')}>SIGN IN</button>
+            <span
+              className="hidden md:inline font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors duration-200"
+              onClick={() => go('auth')}
+            >
+              SIGN IN
+            </span>
           )}
-          <button className="nav-icon" onClick={openDrawer} style={{ position: 'relative' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <button
+            className="relative bg-transparent border-none cursor-pointer p-0 text-[#111]"
+            onClick={openDrawer}
+            aria-label="Cart"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/>
             </svg>
-            {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
+            {cartCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-[#111] text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-medium">
+                {cartCount}
+              </span>
+            )}
           </button>
         </div>
       </nav>
 
-      {/* Mobile dropdown menu */}
-      <div className={`mobile-menu${menuOpen ? ' open' : ''}`}>
-        <span className="mobile-menu-link" onClick={() => go('home')}>HOME</span>
-        <span className="mobile-menu-link" onClick={() => go('shop')}>SHOP</span>
-        <span className="mobile-menu-link" onClick={() => go('about')}>OUR STORY</span>
-        {isLoggedIn ? (
-          <>
-            <span className="mobile-menu-link" onClick={() => go('orders')}>ORDERS</span>
-            <span className="mobile-menu-link" onClick={() => go('profile')}>ACCOUNT</span>
-          </>
-        ) : (
-          <span className="mobile-menu-link" onClick={() => go('auth')}>SIGN IN</span>
-        )}
+      {/* Mobile slide-down menu */}
+      <div
+        className={`md:hidden overflow-hidden bg-[#f8f5f0] border-b border-[#e5dfd7] transition-all duration-300 ease-in-out ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+      >
+        <div className="flex flex-col px-8 py-4 gap-4">
+          <span className="font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors" onClick={() => go('home')}>HOME</span>
+          <span className="font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors" onClick={() => go('shop')}>SHOP</span>
+          <span className="font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors" onClick={() => go('about')}>ABOUT</span>
+          {isLoggedIn ? (
+            <>
+              <span className="font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors" onClick={() => go('orders')}>ORDERS</span>
+              <span className="font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors" onClick={() => go('profile')}>PROFILE</span>
+            </>
+          ) : (
+            <span className="font-[Montserrat] uppercase text-xs tracking-[0.2em] text-[#777] hover:text-[#111] cursor-pointer transition-colors" onClick={() => go('auth')}>SIGN IN</span>
+          )}
+        </div>
       </div>
 
       {/* Overlay to close mobile menu */}
       {menuOpen && (
-        <div onClick={() => setMenuOpen(false)}
-          style={{ position:'fixed', inset:0, zIndex:198, background:'rgba(0,0,0,.2)' }} />
+        <div
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 z-40 bg-black/20 md:hidden"
+        />
       )}
-
-      <style>{`
-        @media (max-width: 900px) {
-          .nav-hamburger { display: flex !important; }
-          .nav-links-desktop { display: none !important; }
-          .nav { grid-template-columns: auto 1fr auto !important; }
-        }
-      `}</style>
     </>
   );
 }
